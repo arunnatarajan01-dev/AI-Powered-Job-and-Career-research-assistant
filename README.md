@@ -1,107 +1,130 @@
-# 🤖 AI Career & Research Assistant Platform
+# AI Powered Job and Career research assistant
 
-An advanced, full-stack AI-powered platform that integrates **Career Intelligence** and **Research Intelligence** into a unified system. This project leverages **Natural Language Processing (NLP), Machine Learning (ML), and Retrieval-Augmented Generation (RAG)** to assist users in career development and academic research.
+A Flask application that combines career guidance and research assistance in one site. The hub is branded **IntegrateAI**. From there you can analyze a resume or work with research papers.
 
----
-
-## 🚀 Live Platform
-**Experience the unified platform live here:**  
-👉 **[https://ai-career-research-assistant-resume.onrender.com](https://ai-career-research-assistant-resume.onrender.com)**
-
-*(Note: The platform is hosted on a free tier; please allow 50+ seconds for the initial load if the server is sleeping.)*
+The running application is `unified_app.py` at the project root. It serves the pages in `templates/` and the logic in `parser/`, `models/`, `recommendation/`, `preparation/`, and `safety/`.
 
 ---
 
-## 📌 Table of Contents
+## What you can do
 
-- [Overview](#-overview)
-- [Objectives](#-objectives)
-- [Key Features](#-key-features)
-- [System Architecture](#-system-architecture)
-- [Tech Stack](#-tech-stack)
-- [Project Workflow](#-project-workflow)
-- [Installation & Setup](#-installation--setup)
-- [Usage Guide](#-usage-guide)
-- [Modules Description](#-modules-description)
-- [Dataset Information](#-dataset-information)
-- [Testing](#-testing)
-- [Project Status](#-project-status)
-- [Future Enhancements](#-future-enhancements)
-- [Contributors](#-contributors)
-- [License](#-license)
+### Hub (`/`)
 
----
+The landing page is a green-and-gold screen with two entries:
 
-## 🌟 Overview
+- **AI Resume Analyzer** opens the career tools.
+- **Research Assistant** opens paper construction and document chat.
 
-The **AI Career & Research Assistant Platform** is designed to simplify two major domains:
+### Career tools
 
-1. **Career Development**
-2. **Academic Research**
+Upload a PDF or DOCX resume (up to 16 MB). The analyzer:
 
-It enables users to analyze resumes, discover job opportunities, identify skill gaps, generate research papers, and extract insights from academic documents — all in one platform.
+- Extracts contact details, education, experience, and skills from `data/skills_db.csv`
+- Scores the resume for ATS-style completeness and formatting
+- Recommends roles from `data/jobs.csv`
+- Shows skill gaps, a learning roadmap, career-path suggestions, and interview questions for the top matching role
 
----
+Job matching uses `all-MiniLM-L6-v2` when `sentence-transformers` is installed. Without that package, matching falls back to keywords.
 
-## 🎯 Objectives
+After analysis, the dashboard at `/dashboard` shows the latest result for the current browser session. `/practice` lists company interview questions and coding problems from `data/company_questions.csv` and `data/coding_questions.csv`.
 
-- Automate resume evaluation and ATS scoring  
-- Provide intelligent job recommendations  
-- Identify skill gaps and suggest learning paths  
-- Generate structured research papers from codebases  
-- Enable intelligent querying of research documents  
-- Reduce manual effort in academic and career workflows  
+### Research assistant (`/research`)
+
+One page with three views:
+
+| View | What it does |
+| --- | --- |
+| Home | Short introduction and links into the two labs |
+| Constructor | Builds an IEEE-style paper draft from a public GitHub URL, author name, and institution. Gemini returns the sections as JSON. The browser can download the draft as a PDF. This view uses a silver-and-charcoal background. |
+| Deconstructor | Reads uploaded PDFs in the browser, then answers questions from that text through Gemini. This view uses a cyan accent background. |
+
+Constructor and deconstructor requests pass through the safety checks in `safety/guardrail.py` before and after the model call. Blocked requests can email an administrator when SMTP settings are present, and they are also written to `logs/admin_alerts.log`.
 
 ---
 
-## 🚀 Key Features
+## Run it locally
 
-### 🧑‍💼 Career Intelligence Module
+Python 3.10 or newer is expected.
 
-- **Resume Parsing**
-  - Supports PDF and DOCX formats
-  - Extracts structured sections (Education, Skills, Experience)
+```powershell
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-- **ATS Score Evaluation**
-  - Multi-parameter scoring system
-  - Checks formatting, skills, and completeness
+Create a `.env` file in the project root:
 
-- **Skill Extraction**
-  - Uses a curated skills database
-  - Handles aliases and variations
+```env
+GEMINI_API_KEY=your_gemini_api_key
+```
 
-- **Job Recommendation Engine**
-  - Powered by BERT (Sentence Transformers)
-  - Semantic similarity matching with job descriptions
+Optional mail settings, used only when a guardrail blocks a request:
 
-- **Skill Gap Analysis**
-  - Identifies missing skills for target roles
+```env
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASSWORD=
+SMTP_FROM=
+ADMIN_EMAIL=
+```
 
-- **Learning Roadmap Generator**
-  - Provides structured and time-based learning plans
+Start the app:
 
----
+```powershell
+python unified_app.py
+```
 
-### 📚 Research Intelligence Module
+Open [http://localhost:5000](http://localhost:5000).
 
-- **Research Paper Generator**
-  - Converts GitHub repositories into IEEE-style papers
-  - Generates Abstract, Introduction, Methodology, etc.
+Research paper generation and document chat need a valid `GEMINI_API_KEY`. Resume analysis, the dashboard, and practice questions work without it. For semantic job matching, also install:
 
-- **RAG-based Q&A System**
-  - Upload multiple research papers
-  - Ask context-aware questions
-  - Retrieves accurate answers using vector search
-
-- **Multi-Session Support**
-  - Maintains independent research sessions
-
-- **Interactive UI**
-  - Real-time processing visualization
-  - Smooth and modern user experience
+```powershell
+pip install sentence-transformers
+```
 
 ---
 
-## 🏗️ System Architecture
+## Routes
 
-The system follows a **modular architecture**:
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/` | IntegrateAI hub |
+| GET | `/resume` | Resume upload |
+| POST | `/analyze` | Run the resume pipeline and store the result |
+| GET | `/dashboard` | Latest analysis for this session |
+| GET | `/practice` | Interview and coding practice |
+| GET | `/research` | Constructor and deconstructor |
+| GET | `/api/interview-questions/<company>` | Company interview questions |
+| GET | `/api/coding-practice` | Coding problems, with optional company, topic, and difficulty |
+| GET | `/api/companies` | Company lists |
+| GET | `/api/topics` | Coding topics |
+| POST | `/api/constructor_generate` | IEEE paper draft from a repository URL |
+| POST | `/api/chat_research` | Document-grounded research chat |
+
+Gemini calls try available `generateContent` models and prefer names that contain `flash` or `pro`.
+
+---
+
+## Project layout
+
+```text
+unified_app.py          Flask entry point
+templates/              Hub, resume, dashboard, practice, and research pages
+static/                 CSS and research page script
+parser/                 PDF, DOCX, and section extraction
+models/                 Skills, ATS score, feedback, and job matching
+recommendation/         Skill gaps, roadmap, and career paths
+preparation/            Interview and coding question banks
+data/                   Skills, jobs, and practice CSVs
+safety/                 Input and output guardrails, admin alerts
+uploads/                Temporary resume files, removed after analysis
+```
+
+`Resume Analyzer and Job Recommendation System/` and `research-Paper-AI-Assistant-main/` are earlier standalone copies. They are not what `python unified_app.py` serves.
+
+---
+
+## Hosted copy
+
+A deployed instance is published at [https://ai-career-research-assistant-resume.onrender.com](https://ai-career-research-assistant-resume.onrender.com). On the free tier, the first request after idle time can take about a minute.

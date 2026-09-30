@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Your AI-powered resume analysis dashboard with ATS score, job recommendations, skill gaps, and career guidance.">
+    <title>Dashboard | AI Resume Analyzer</title>
+    <link rel="stylesheet" href="static/css/resume_style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animated"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="nav-brand">
+            <div class="brand-icon">🧠</div>
+            <span>ResumeAI</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Hub</a></li>
+            <li><a href="resume.html">Home</a></li>
+            <li><a href="dashboard.html" class="active">Dashboard</a></li>
+            <li><a href="practice.html">Practice</a></li>
+        </ul>
+    </nav>
+
+    <div class="dashboard">
+        <div class="dashboard-container">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <h1>📊 Resume Analysis <span class="text-gradient">Dashboard</span></h1>
+                <p class="summary-text">Your resume shows exceptional strength in Backend Engineering and Cloud Architecture. With an 85% match for Senior Software roles, you are highly competitive for top tech companies.</p>
+            </div>
+
+            <!-- ATS Score Section -->
+            <div class="ats-section">
+                <!-- Score Ring -->
+                <div class="ats-score-card">
+                    <div class="score-ring">
+                        <svg viewBox="0 0 200 200">
+                            <defs>
+                                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#7c5cfc"/>
+                                    <stop offset="100%" style="stop-color:#00d4aa"/>
+                                </linearGradient>
+                            </defs>
+                            <circle class="bg-circle" cx="100" cy="100" r="90"/>
+                            <circle class="progress-circle" cx="100" cy="100" r="90" 
+                                    data-percentage="85" style="stroke-dashoffset: 84.823px;"/>
+                        </svg>
+                        <div class="score-value">
+                            <div class="score-number counter" data-target="85">85</div>
+                            <div class="score-label">out of 100</div>
+                        </div>
+                    </div>
+                    <div class="score-grade grade-A">
+                        A — Excellent Matching
+                    </div>
+                </div>
+
+                <!-- Score Breakdown -->
+                <div class="ats-breakdown">
+                    <h3>📋 Score Breakdown</h3>
+                    <div class="breakdown-item">
+                        <div class="breakdown-header">
+                            <span class="breakdown-label">Skill Matching</span>
+                            <span class="breakdown-score">28/30</span>
+                        </div>
+                        <div class="breakdown-bar">
+                            <div class="breakdown-fill" data-width="93.3"></div>
+                        </div>
+                        <div class="breakdown-details">You have 93% of the required skills for your target roles.</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-header">
+                            <span class="breakdown-label">Experience Relevance</span>
+                            <span class="breakdown-score">22/25</span>
+                        </div>
+                        <div class="breakdown-bar">
+                            <div class="breakdown-fill" data-width="88"></div>
+                        </div>
+                        <div class="breakdown-details">Your 5+ years of experience aligns well with Senior requirements.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Extracted Skills -->
+                <div class="dash-card stagger-1">
+                    <h3><span class="card-icon">🎯</span> Extracted Skills (15)</h3>
+                    <div class="skills-grid">
+                        <div class="skill-category-label">Languages</div>
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">JavaScript</span>
+                        <span class="skill-tag">TypeScript</span>
+                        <span class="skill-tag">SQL</span>
+                        
+                        <div class="skill-category-label">Frameworks</div>
+                        <span class="skill-tag">Flask</span>
+                        <span class="skill-tag">React</span>
+                        <span class="skill-tag">Node.js</span>
+                        <span class="skill-tag">PostgreSQL</span>
+                        
+                        <div class="skill-category-label">Cloud & Tools</div>
+                        <span class="skill-tag">AWS</span>
+                        <span class="skill-tag">Docker</span>
+                        <span class="skill-tag">Git</span>
+                    </div>
+                </div>
+
+                <!-- Resume Feedback -->
+                <div class="dash-card stagger-2">
+                    <h3><span class="card-icon">✨</span> Improvement Suggestions</h3>
+                    <div class="feedback-item priority-High">
+                        <div class="feedback-header">
+                            <span class="feedback-icon">📈</span>
+                            <span class="feedback-title">Quantify Achievements</span>
+                            <span class="feedback-impact High">High Impact</span>
+                        </div>
+                        <div class="feedback-text">Add more metrics to your bullet points (e.g., 'Reduced latency by 30%' instead of 'Optimized API').</div>
+                    </div>
+                    <div class="feedback-item priority-Medium">
+                        <div class="feedback-header">
+                            <span class="feedback-icon">🔑</span>
+                            <span class="feedback-title">Keyword Optimization</span>
+                            <span class="feedback-impact Medium">Medium Impact</span>
+                        </div>
+                        <div class="feedback-text">Incorporate 'Distributed Systems' and 'CI/CD' more prominently in your summary.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Recommendations -->
+            <div class="full-section stagger-3">
+                <h3><span class="card-icon">💼</span> Top Job Recommendations</h3>
+                <div class="dashboard-grid">
+                    <div class="job-card">
+                        <div class="job-header">
+                            <div>
+                                <div class="job-title">Senior Software Engineer</div>
+                                <div class="job-company" style="font-size: 0.9rem; color: #00d4aa; font-weight: 600; margin-bottom: 0.2rem;">
+                                    🏛️ Google
+                                </div>
+                            </div>
+                            <span class="job-match-badge" style="background: #00d4aa22; color: #00d4aa; border: 1px solid #00d4aa44;">
+                                92% Match
+                            </span>
+                        </div>
+                        <div class="job-meta">
+                            <span>📍 Mountain View, CA</span>
+                            <span>💼 Senior</span>
+                            <span>💰 $180k - $250k</span>
+                            <span>📅 2 days ago</span>
+                        </div>
+                        <div class="match-bar">
+                            <div class="match-fill" style="background: #00d4aa;" data-width="92"></div>
+                        </div>
+                        <div class="job-skills">
+                            <span class="job-skill-tag matched">✓ Python</span>
+                            <span class="job-skill-tag matched">✓ AWS</span>
+                            <span class="job-skill-tag missing">✗ Kubernetes</span>
+                        </div>
+                    </div>
+                    <div class="job-card">
+                        <div class="job-header">
+                            <div>
+                                <div class="job-title">Backend Architect</div>
+                                <div class="job-company" style="font-size: 0.9rem; color: #7c5cfc; font-weight: 600; margin-bottom: 0.2rem;">
+                                    🏛️ Amazon
+                                </div>
+                            </div>
+                            <span class="job-match-badge" style="background: #7c5cfc22; color: #7c5cfc; border: 1px solid #7c5cfc44;">
+                                88% Match
+                            </span>
+                        </div>
+                        <div class="job-meta">
+                            <span>📍 Seattle, WA</span>
+                            <span>💼 Lead</span>
+                            <span>💰 $170k - $230k</span>
+                            <span>📅 5 days ago</span>
+                        </div>
+                        <div class="match-bar">
+                            <div class="match-fill" style="background: #7c5cfc;" data-width="88"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="text-align: center; padding: 2rem 0;">
+                <a href="resume.html" class="btn-analyze show" style="display: inline-block; width: auto; text-decoration: none;">
+                    <span>🔄 Analyze Another Resume</span>
+                </a>
+                <a href="practice.html" class="btn-analyze show" style="display: inline-block; width: auto; text-decoration: none; margin-left: 1rem; background: linear-gradient(135deg, #00d4aa, #7c5cfc);">
+                    <span>🎯 Practice Interview</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Built with 🧠 AI &amp; ❤️ | AI Resume Analyzer &amp; Job Recommendation System</p>
+    </footer>
+
+    <script src="static/js/resume_script.js?v=1.0.3"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const data = JSON.parse(sessionStorage.getItem('last_analysis'));
+            if (!data) return; // Fallback to hardcoded demo if no data
+
+            // 1. Update Header
+            document.querySelector('.summary-text').textContent = data.summary;
+
+            // 2. Update ATS Score
+            const scoreEl = document.querySelector('.score-number');
+            scoreEl.dataset.target = data.ats.percentage;
+            scoreEl.textContent = '0';
+            
+            const gradeEl = document.querySelector('.score-grade');
+            gradeEl.className = `score-grade grade-${data.ats.grade}`;
+            gradeEl.textContent = `${data.ats.grade} — ${data.ats.grade_label}`;
+
+            const ring = document.querySelector('.progress-circle');
+            ring.dataset.percentage = data.ats.percentage;
+            
+            // 3. Update Breakdown
+            const breakdownContainer = document.querySelector('.ats-breakdown');
+            breakdownContainer.innerHTML = '<h3>📋 Score Breakdown</h3>';
+            Object.values(data.ats.breakdown).forEach(item => {
+                const pct = (item.score / item.max * 100).toFixed(1);
+                breakdownContainer.innerHTML += `
+                    <div class="breakdown-item">
+                        <div class="breakdown-header">
+                            <span class="breakdown-label">${item.label}</span>
+                            <span class="breakdown-score">${item.score}/${item.max}</span>
+                        </div>
+                        <div class="breakdown-bar">
+                            <div class="breakdown-fill" data-width="${pct}"></div>
+                        </div>
+                        <div class="breakdown-details">${item.details}</div>
+                    </div>
+                `;
+            });
+
+            // 4. Update Skills
+            const skillsGrid = document.querySelector('.skills-grid');
+            skillsGrid.innerHTML = '';
+            Object.entries(data.skills_by_category).forEach(([cat, list]) => {
+                if (list.length === 0) return;
+                skillsGrid.innerHTML += `<div class="skill-category-label">${cat}</div>`;
+                list.forEach(skill => {
+                    skillsGrid.innerHTML += `<span class="skill-tag">${skill}</span>`;
+                });
+            });
+
+            // 5. Update Feedback
+            const feedbackContainer = document.querySelector('.dash-card.stagger-2');
+            feedbackContainer.innerHTML = `<h3><span class="card-icon">✨</span> Improvement Suggestions</h3>`;
+            data.feedback.forEach(item => {
+                feedbackContainer.innerHTML += `
+                    <div class="feedback-item priority-${item.priority}">
+                        <div class="feedback-header">
+                            <span class="feedback-icon">${item.icon}</span>
+                            <span class="feedback-title">${item.title}</span>
+                            <span class="feedback-impact ${item.priority}">${item.impact}</span>
+                        </div>
+                        <div class="feedback-text">${item.suggestion}</div>
+                    </div>
+                `;
+            });
+
+            // 6. Update Jobs
+            const jobsGrid = document.querySelector('.full-section.stagger-3 .dashboard-grid');
+            jobsGrid.innerHTML = '';
+            data.recommendations.forEach(job => {
+                jobsGrid.innerHTML += `
+                    <div class="job-card">
+                        <div class="job-header">
+                            <div>
+                                <div class="job-title">${job.title}</div>
+                                <div class="job-company" style="font-size: 0.9rem; color: #00d4aa; font-weight: 600; margin-bottom: 0.2rem;">🏛️ ${job.company}</div>
+                            </div>
+                            <span class="job-match-badge" style="background: ${job.fit_color}22; color: ${job.fit_color}; border: 1px solid ${job.fit_color}44;">
+                                ${job.match_score}% Match
+                            </span>
+                        </div>
+                        <div class="job-meta">
+                            <span>📍 ${job.location}</span>
+                            <span>💼 ${job.experience_level}</span>
+                            <span>💰 ${job.salary_range}</span>
+                            <span>📅 ${job.posted_date}</span>
+                        </div>
+                        <div class="match-bar">
+                            <div class="match-fill" style="background: ${job.fit_color};" data-width="${job.match_score}"></div>
+                        </div>
+                        <div class="job-skills">
+                            ${job.matched_skills.map(s => `<span class="job-skill-tag matched">✓ ${s}</span>`).join('')}
+                            ${job.missing_skills.map(s => `<span class="job-skill-tag missing">✗ ${s}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Re-run animations for new elements
+            initDashboardAnimations();
+        });
+    </script>
+</body>
+</html>

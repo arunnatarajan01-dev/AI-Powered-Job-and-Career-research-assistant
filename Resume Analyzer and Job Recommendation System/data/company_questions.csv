@@ -1,0 +1,91 @@
+company,question,category,difficulty
+Google,Tell me about a time you solved a complex technical problem.,Behavioral,Medium
+Google,How would you design Google Search autocomplete?,System Design,Hard
+Google,Explain the concept of MapReduce and when you would use it.,Technical,Medium
+Google,Describe a situation where you had to deal with ambiguity.,Behavioral,Medium
+Google,How would you design a URL shortener like goo.gl?,System Design,Medium
+Google,What is your approach to code reviews?,Technical,Easy
+Google,How do you prioritize tasks when working on multiple projects?,Behavioral,Easy
+Google,Design a real-time collaborative editing system like Google Docs.,System Design,Hard
+Google,Explain how garbage collection works in your preferred language.,Technical,Medium
+Google,Tell me about a time you disagreed with a team member.,Behavioral,Medium
+Amazon,Tell me about a time you delivered results under tight deadlines.,Behavioral,Medium
+Amazon,How would you design Amazon's recommendation system?,System Design,Hard
+Amazon,Describe a time when you had to make a decision with incomplete data.,Behavioral,Medium
+Amazon,How would you design a system to handle Black Friday traffic?,System Design,Hard
+Amazon,Tell me about your most challenging project and how you handled it.,Behavioral,Medium
+Amazon,Explain the CAP theorem and its implications.,Technical,Medium
+Amazon,What does customer obsession mean to you?,Behavioral,Easy
+Amazon,Design a distributed caching system.,System Design,Hard
+Amazon,How would you improve the efficiency of a slow database query?,Technical,Medium
+Amazon,Describe a time you took ownership of a problem outside your scope.,Behavioral,Medium
+Microsoft,How would you design Microsoft Teams?,System Design,Hard
+Microsoft,Describe a time you mentored someone.,Behavioral,Medium
+Microsoft,Explain the difference between processes and threads.,Technical,Easy
+Microsoft,How do you handle technical debt in your projects?,Behavioral,Medium
+Microsoft,Design a file synchronization service like OneDrive.,System Design,Hard
+Microsoft,What is dependency injection and why is it useful?,Technical,Medium
+Microsoft,Tell me about a time you had to learn a new technology quickly.,Behavioral,Easy
+Microsoft,How would you design an email system?,System Design,Medium
+Microsoft,Explain RESTful API design principles.,Technical,Medium
+Microsoft,Describe how you would debug a production issue.,Technical,Medium
+Meta,How would you design Facebook's News Feed?,System Design,Hard
+Meta,Tell me about a time you moved fast and broke things.,Behavioral,Medium
+Meta,Explain the concept of eventual consistency.,Technical,Hard
+Meta,How do you approach building products at scale?,Behavioral,Medium
+Meta,Design an Instagram-like photo sharing service.,System Design,Medium
+Meta,What is your experience with A/B testing?,Technical,Medium
+Meta,Describe a time you had to make a tough product decision.,Behavioral,Medium
+Meta,How would you design a chat messaging system?,System Design,Hard
+Meta,Explain how DNS works.,Technical,Easy
+Meta,Tell me about a time you improved a process or system.,Behavioral,Easy
+Apple,How would you design the App Store?,System Design,Hard
+Apple,Tell me about a product you love and how you would improve it.,Behavioral,Medium
+Apple,Explain memory management in iOS/macOS.,Technical,Medium
+Apple,How do you ensure code quality in your projects?,Behavioral,Easy
+Apple,Design a music streaming service like Apple Music.,System Design,Hard
+Apple,What is your approach to accessibility in software design?,Technical,Medium
+Apple,Describe a time you had to balance quality with speed.,Behavioral,Medium
+Apple,How would you design Siri's backend?,System Design,Hard
+Apple,Explain the MVC design pattern.,Technical,Easy
+Apple,Tell me about a time you advocated for the user.,Behavioral,Medium
+Netflix,How would you design Netflix's streaming architecture?,System Design,Hard
+Netflix,Tell me about a time you took a risk that paid off.,Behavioral,Medium
+Netflix,Explain content delivery networks (CDNs).,Technical,Medium
+Netflix,How do you approach microservices architecture?,Technical,Medium
+Netflix,Design a recommendation engine for movies.,System Design,Hard
+Uber,How would you design Uber's ride matching system?,System Design,Hard
+Uber,Tell me about a time you optimized a system for performance.,Behavioral,Medium
+Uber,Explain the concept of load balancing.,Technical,Medium
+Uber,How do you handle real-time data processing?,Technical,Hard
+Uber,Design a surge pricing algorithm.,System Design,Hard
+LinkedIn,How would you design LinkedIn's connection suggestion system?,System Design,Medium
+LinkedIn,Tell me about a time you influenced without authority.,Behavioral,Medium
+LinkedIn,Explain graph databases and their use cases.,Technical,Medium
+LinkedIn,How do you approach data privacy in your designs?,Technical,Medium
+LinkedIn,Design a professional networking feed.,System Design,Medium
+Goldman Sachs,How would you design a trading platform?,System Design,Hard
+Goldman Sachs,Explain concepts of risk management in software.,Technical,Medium
+Goldman Sachs,Tell me about a time you handled a high-pressure situation.,Behavioral,Medium
+Goldman Sachs,How do you ensure data security in financial applications?,Technical,Hard
+Goldman Sachs,Design a real-time stock price alerting system.,System Design,Medium
+Adobe,How would you design a collaborative design tool?,System Design,Hard
+Adobe,Tell me about your experience with creative problem solving.,Behavioral,Medium
+Adobe,Explain image compression algorithms.,Technical,Medium
+Adobe,How do you approach cross-platform compatibility?,Technical,Medium
+Adobe,Design a cloud-based document editing system.,System Design,Medium
+Salesforce,How would you design a CRM system?,System Design,Hard
+Salesforce,Tell me about a time you improved customer satisfaction.,Behavioral,Medium
+Salesforce,Explain multi-tenant architecture.,Technical,Hard
+Salesforce,How do you approach API versioning?,Technical,Medium
+Salesforce,Design a workflow automation system.,System Design,Medium
+Oracle,How would you design a distributed database?,System Design,Hard
+Oracle,Tell me about a time you optimized database performance.,Behavioral,Medium
+Oracle,Explain ACID properties in databases.,Technical,Medium
+Oracle,How do you handle database migrations?,Technical,Medium
+Oracle,Design an enterprise resource planning system.,System Design,Hard
+IBM,How would you design a large-scale data processing pipeline?,System Design,Hard
+IBM,Tell me about your experience with enterprise software.,Behavioral,Medium
+IBM,Explain containerization and its benefits.,Technical,Medium
+IBM,How do you approach legacy system modernization?,Technical,Hard
+IBM,Design a cloud infrastructure monitoring system.,System Design,Medium

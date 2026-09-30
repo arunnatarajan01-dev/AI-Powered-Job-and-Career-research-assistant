@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified AI Excellence Platform | Resume & Research Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0c2416;
+            --primary: #22c55e;
+            --secondary: #eab308;
+            --accent: #bef264;
+            --text-main: #f7fee7;
+            --text-muted: #d9f99d;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Animated Background */
+        .bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background:
+                radial-gradient(ellipse 80% 60% at 8% 0%, rgba(250, 204, 21, 0.62), transparent 56%),
+                radial-gradient(ellipse 70% 55% at 100% 100%, rgba(34, 197, 94, 0.55), transparent 54%),
+                radial-gradient(ellipse 50% 42% at 82% 8%, rgba(190, 242, 100, 0.45), transparent 50%),
+                linear-gradient(155deg, #14532d 0%, #166534 46%, #0f3d24 100%);
+        }
+
+        .glow {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.35;
+            z-index: -1;
+        }
+
+        .glow-1 { top: -200px; left: -200px; background: var(--primary); animation: float 20s infinite alternate; }
+        .glow-2 { bottom: -200px; right: -200px; background: var(--secondary); animation: float 25s infinite alternate-reverse; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.1); }
+        }
+
+        /* Navbar */
+        .navbar {
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero { max-width: 900px; margin-bottom: 4rem; }
+        .hero h1 { font-size: 2.75rem; line-height: 1.15; margin-bottom: 1.5rem; font-family: 'Outfit', sans-serif; }
+        .hero p { font-size: 1.25rem; color: var(--text-muted); max-width: 700px; margin: 0 auto; }
+
+        /* Hub Cards */
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .hub-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hub-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--primary);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .hub-card .icon { font-size: 4rem; margin-bottom: 2rem; filter: drop-shadow(0 0 10px var(--primary)); }
+        .hub-card h2 { font-size: 2rem; margin-bottom: 1rem; font-family: 'Outfit', sans-serif; }
+        .hub-card p { color: var(--text-muted); line-height: 1.5; margin-bottom: 2rem; }
+
+        .btn-enter {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hub-card:hover .btn-enter {
+            box-shadow: 0 0 20px var(--primary);
+            transform: scale(1.1);
+        }
+
+        /* Decorative Elements */
+        .hub-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        .hub-card:hover::before { transform: translateX(100%); }
+
+        footer { padding: 3rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.85rem; }
+            .navbar { padding: 1.5rem 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-container">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+    </div>
+
+    <header class="navbar">
+        <div class="logo">Integrate<span>AI</span></div>
+        <div class="nav-right">
+            <span style="color: var(--text-muted); font-size: 0.9rem;">Empowering Future Researchers</span>
+        </div>
+    </header>
+
+    <main>
+        <div class="hero">
+            <h1><span style="background: linear-gradient(135deg, #facc15, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AI Powered Job and Career research assistant</span></h1>
+            <p>One unified platform for career acceleration and academic excellence. Analyze resumes with ATS-grade intelligence or construct peer-ready research papers autonomously.</p>
+        </div>
+
+        <div class="hub-grid">
+            <a href="/resume" class="hub-card">
+                <div class="icon">📄</div>
+                <h2>AI Resume Analyzer</h2>
+                <p>Upload your resume for deep ATS scoring, skill gap analysis, and tailored job recommendations using BERT transformers.</p>
+                <div class="btn-enter">Enter Laboratory</div>
+            </a>
+
+            <a href="/research" class="hub-card">
+                <div class="icon">⚛️</div>
+                <h2>Research Assistant</h2>
+                <p>Construct IEEE-standard research papers from code repositories and deconstruct complex PDFs with document-grounded AI.</p>
+                <div class="btn-enter">Enter Research Lab</div>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Unified AI Excellence Platform | Built for Innovation</p>
+    </footer>
+</body>
+</html>

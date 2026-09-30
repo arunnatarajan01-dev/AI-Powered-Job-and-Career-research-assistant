@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Paper AI Assistant | Premium AI Tools</title>
+    <meta name="description" content="An AI-powered research assistant for academic paper generation and analysis. Built with modern web standards and high-end animations.">
+    <!-- Google Fonts: Outfit and Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS Link -->
+    <link rel="stylesheet" href="index.css">
+    <!-- jsPDF for client-side PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-container">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+        <div class="glow glow-3"></div>
+        <svg class="research-wave" preserveAspectRatio="none" viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 0v46.29c47.79 22.2 103.59 32.17 158 28 70.36-5.37 136.33-33.31 206.8-37.5 73.84-4.36 147.54 16.88 218.2 35.26 69.27 18 138.38 24.88 209.4 13.08 36.15-6 69.85-17.84 104.45-29.34C989.49 25 1113-14.29 1200 52.47V0z" opacity=".25"></path>
+            <path d="M0 0v15.81c13 21.11 27.64 41.05 47.69 56.24C99.41 111.27 165 111 224.58 91.58c31.15-10.15 60.09-26.07 89.67-39.8 40.92-19 84.73-46 130.83-49.67 36.26-2.85 70.9 9.42 98.6 31.56 31.77 25.39 62.32 62 103.63 73 40.44 10.79 81.35-6.69 119.13-24.28s75.16-39 116.92-43.05c59.73-5.85 113.28 22.88 168.9 38.84 30.2 8.66 59 6.17 87.09-7.51 22.43-10.89 44.67-30.44 60.65-50.69V0z" opacity=".5"></path>
+            <path d="M0 0v5.63C149.93 59 314.09 71.32 475.83 42.57c43-7.64 84.23-20.12 127.61-26.46 59-8.63 112.48 12.24 165.56 35.46C827.93 77.22 886 95.24 951.2 90c86.53-7 172.46-45.71 248.8-84.81V0z" opacity=".125"></path>
+        </svg>
+    </div>
+
+    <!-- Navigation -->
+    <header class="navbar">
+        <div class="logo">
+            <span class="icon">⚛️</span>
+            <span class="text">Paper<span class="gradient-text">AI</span></span>
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link">Hub</a></li>
+                <li><a href="#home" class="nav-link active" data-section="home">Home</a></li>
+                <li><a href="#constructor" class="nav-link" data-section="constructor">Constructor</a></li>
+                <li><a href="#deconstructor" class="nav-link" data-section="deconstructor">Deconstructor</a></li>
+            </ul>
+        </nav>
+        <button class="btn btn-primary" id="btn-cta">Get Started</button>
+    </header>
+
+    <main id="content-area">
+        <!-- Home Section -->
+        <section id="home" class="page-section active">
+            <div class="hero">
+                <h1 class="stagger-entry">Elevate Your <span class="gradient-text-2">Research</span> with AI</h1>
+                <p class="stagger-entry">Construct IEEE-standard papers from code repositories and deconstruct complex PDFs with document-grounded intelligence.</p>
+                <div class="hero-actions stagger-entry">
+                    <button class="btn btn-gradient btn-lg" onclick="showSection('constructor')">Generate Paper</button>
+                    <button class="btn btn-outline btn-lg" onclick="showSection('deconstructor')">Analyze Research</button>
+                </div>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card stagger-entry">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Constructor</h3>
+                    <p>Transform technical repositories into structured IEEE research documents autonomously.</p>
+                </div>
+                <div class="feature-card stagger-entry">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Deconstructor</h3>
+                    <p>Upload complex papers and interact with them using Retrieval-Augmented Generation.</p>
+                </div>
+                <div class="feature-card stagger-entry">
+                    <div class="feature-icon">💾</div>
+                    <h3>Persistent</h3>
+                    <p>Secure multi-session storage for all your academic and technical workflows.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Constructor Section -->
+        <section id="constructor" class="page-section">
+            <div class="section-wrapper">
+                <div class="form-container glass">
+                    <div class="section-header">
+                        <h2>IEEE Paper <span class="gradient-text">Constructor</span></h2>
+                        <p>Generate a professional research paper from any public GitHub repository.</p>
+                    </div>
+                    <form id="form-constructor" class="interactive-form">
+                        <div class="input-group">
+                            <label for="repo-url">GitHub Repository URL</label>
+                            <input type="url" id="repo-url" placeholder="https://github.com/username/repo" required>
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label for="author-name">Author Name</label>
+                                <input type="text" id="author-name" placeholder="John Doe" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="institution">Institution</label>
+                                <input type="text" id="institution" placeholder="University of Innovation" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-gradient full-width">Generate Research Paper</button>
+                    </form>
+                </div>
+
+                <!-- Processing Overlay (Hidden by Default) -->
+                <div id="constructor-processing" class="processing-overlay hidden">
+                    <div class="processor-card glass">
+                        <div class="spinner-container">
+                            <div class="spinner"></div>
+                            <div class="spinner-core"></div>
+                        </div>
+                        <h3>Analyzing Repository...</h3>
+                        <div class="status-steps">
+                            <div class="step" id="step-fetch">Fetching Repository Source</div>
+                            <div class="step" id="step-vector">Building Vector Knowledge Base</div>
+                            <div class="step" id="step-analyze">AI Architecture Analysis</div>
+                            <div class="step" id="step-generate">Drafting IEEE Paper</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result Area (Hidden by Default) -->
+                <div id="constructor-result" class="result-area hidden">
+                    <div class="result-card glass">
+                        <div class="preview-header">
+                            <h3>Document Preview</h3>
+                            <button class="btn btn-outline btn-sm" id="btn-download-pdf">Download IEEE PDF</button>
+                        </div>
+                        <div class="preview-content">
+                            <h2 id="preview-title">Automated Analysis of Distributed Systems</h2>
+                            <p class="preview-authors" id="preview-meta">Authors: John Doe | Institution: University of Innovation</p>
+                            <div class="preview-body">
+                                <div class="preview-section">
+                                    <h4 class="gradient-text">Abstract</h4>
+                                    <p id="preview-abstract">Analyzing repository source code for architectural patterns...</p>
+                                </div>
+                                <div class="preview-section">
+                                    <h4 class="gradient-text">Architecture & Design</h4>
+                                    <p id="preview-architecture">Extracting structural components and dependency graphs...</p>
+                                </div>
+                                <div class="preview-section">
+                                    <h4 class="gradient-text">Methodology</h4>
+                                    <p id="preview-methodology">Applying RAG-based analysis to the codebase...</p>
+                                </div>
+                                <div class="preview-stats glass">
+                                    <div class="stat"><span>Files Indexed:</span> <strong id="stat-files">--</strong></div>
+                                    <div class="stat"><span>Complexity:</span> <strong id="stat-complexity">--</strong></div>
+                                    <div class="stat"><span>AI Confidence:</span> <strong id="stat-confidence">--</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Deconstructor Section -->
+        <section id="deconstructor" class="page-section">
+            <div class="deconstructor-layout">
+                <aside class="chat-sidebar glass">
+                    <div class="sidebar-header">
+                        <h3>Sessions</h3>
+                        <button class="btn-icon" id="btn-new-session">＋</button>
+                    </div>
+                    <ul class="session-list" id="session-list">
+                        <li class="session-item active" id="session-current">Current Session</li>
+                        <li class="session-item">Efficient Transformers</li>
+                        <li class="session-item">RAG Optimization</li>
+                    </ul>
+                </aside>
+
+                <div class="chat-main glass">
+                    <!-- Upload State -->
+                    <div id="upload-screen" class="upload-container">
+                        <div class="upload-zone" id="drop-zone">
+                            <div class="upload-icon">📄</div>
+                            <h3>Upload Research Papers</h3>
+                            <p>Drag and drop PDF files or click to browse</p>
+                            <input type="file" id="file-input" multiple accept=".pdf" class="hidden">
+                            <button class="btn btn-primary btn-sm" onclick="document.getElementById('file-input').click()">Browse Files</button>
+                        </div>
+                    </div>
+
+                    <!-- Chat State (Hidden by Default) -->
+                    <div id="chat-screen" class="chat-container hidden">
+                        <div class="message-feed" id="message-feed">
+                            <div class="message system">
+                                <div class="avatar">🤖</div>
+                                <div class="bubble" id="initial-message">I've analyzed your papers. Ask me anything about the methodology, results, or data.</div>
+                            </div>
+                        </div>
+                        <div id="typing-indicator" class="typing-indicator hidden">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" placeholder="Ask a question about the papers...">
+                            <button class="btn btn-gradient btn-icon" id="btn-send">➤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Research Paper AI Assistant | Engineered for Excellence</p>
+    </footer>
+
+    <!-- App Script -->
+    <script src="app.js"></script>
+</body>
+</html>

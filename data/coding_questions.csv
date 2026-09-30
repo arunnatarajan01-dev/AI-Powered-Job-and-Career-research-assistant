@@ -1,0 +1,101 @@
+company,question,difficulty,topic,link
+Google,Two Sum,Easy,Arrays,https://leetcode.com/problems/two-sum/
+Google,Median of Two Sorted Arrays,Hard,Binary Search,https://leetcode.com/problems/median-of-two-sorted-arrays/
+Google,Longest Substring Without Repeating Characters,Medium,Sliding Window,https://leetcode.com/problems/longest-substring-without-repeating-characters/
+Google,Regular Expression Matching,Hard,Dynamic Programming,https://leetcode.com/problems/regular-expression-matching/
+Google,Container With Most Water,Medium,Two Pointers,https://leetcode.com/problems/container-with-most-water/
+Google,Merge k Sorted Lists,Hard,Heap,https://leetcode.com/problems/merge-k-sorted-lists/
+Google,Trapping Rain Water,Hard,Stack,https://leetcode.com/problems/trapping-rain-water/
+Google,Word Break,Medium,Dynamic Programming,https://leetcode.com/problems/word-break/
+Google,Number of Islands,Medium,BFS/DFS,https://leetcode.com/problems/number-of-islands/
+Google,Serialize and Deserialize Binary Tree,Hard,Trees,https://leetcode.com/problems/serialize-and-deserialize-binary-tree/
+Amazon,Best Time to Buy and Sell Stock,Easy,Arrays,https://leetcode.com/problems/best-time-to-buy-and-sell-stock/
+Amazon,Add Two Numbers,Medium,Linked List,https://leetcode.com/problems/add-two-numbers/
+Amazon,LRU Cache,Medium,Design,https://leetcode.com/problems/lru-cache/
+Amazon,Valid Parentheses,Easy,Stack,https://leetcode.com/problems/valid-parentheses/
+Amazon,Merge Intervals,Medium,Sorting,https://leetcode.com/problems/merge-intervals/
+Amazon,Maximum Subarray,Medium,Dynamic Programming,https://leetcode.com/problems/maximum-subarray/
+Amazon,Word Ladder,Hard,BFS/DFS,https://leetcode.com/problems/word-ladder/
+Amazon,K Closest Points to Origin,Medium,Heap,https://leetcode.com/problems/k-closest-points-to-origin/
+Amazon,Min Stack,Medium,Stack,https://leetcode.com/problems/min-stack/
+Amazon,Rotting Oranges,Medium,BFS/DFS,https://leetcode.com/problems/rotting-oranges/
+Microsoft,Reverse Linked List,Easy,Linked List,https://leetcode.com/problems/reverse-linked-list/
+Microsoft,3Sum,Medium,Two Pointers,https://leetcode.com/problems/3sum/
+Microsoft,Binary Tree Level Order Traversal,Medium,Trees,https://leetcode.com/problems/binary-tree-level-order-traversal/
+Microsoft,Spiral Matrix,Medium,Arrays,https://leetcode.com/problems/spiral-matrix/
+Microsoft,Group Anagrams,Medium,Hash Table,https://leetcode.com/problems/group-anagrams/
+Microsoft,Longest Palindromic Substring,Medium,Dynamic Programming,https://leetcode.com/problems/longest-palindromic-substring/
+Microsoft,Course Schedule,Medium,Graph,https://leetcode.com/problems/course-schedule/
+Microsoft,Product of Array Except Self,Medium,Arrays,https://leetcode.com/problems/product-of-array-except-self/
+Microsoft,Coin Change,Medium,Dynamic Programming,https://leetcode.com/problems/coin-change/
+Microsoft,Find Median from Data Stream,Hard,Heap,https://leetcode.com/problems/find-median-from-data-stream/
+Meta,Remove Nth Node From End of List,Medium,Linked List,https://leetcode.com/problems/remove-nth-node-from-end-of-list/
+Meta,Subarray Sum Equals K,Medium,Hash Table,https://leetcode.com/problems/subarray-sum-equals-k/
+Meta,Minimum Window Substring,Hard,Sliding Window,https://leetcode.com/problems/minimum-window-substring/
+Meta,Binary Tree Maximum Path Sum,Hard,Trees,https://leetcode.com/problems/binary-tree-maximum-path-sum/
+Meta,Clone Graph,Medium,BFS/DFS,https://leetcode.com/problems/clone-graph/
+Meta,Valid Palindrome,Easy,Strings,https://leetcode.com/problems/valid-palindrome/
+Meta,Random Pick with Weight,Medium,Binary Search,https://leetcode.com/problems/random-pick-with-weight/
+Meta,Lowest Common Ancestor of a Binary Tree,Medium,Trees,https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/
+Meta,Accounts Merge,Medium,Graph,https://leetcode.com/problems/accounts-merge/
+Meta,Pow(x n),Medium,Math,https://leetcode.com/problems/powx-n/
+Apple,Move Zeroes,Easy,Arrays,https://leetcode.com/problems/move-zeroes/
+Apple,Letter Combinations of a Phone Number,Medium,Backtracking,https://leetcode.com/problems/letter-combinations-of-a-phone-number/
+Apple,Top K Frequent Elements,Medium,Heap,https://leetcode.com/problems/top-k-frequent-elements/
+Apple,Design Add and Search Words Data Structure,Medium,Trie,https://leetcode.com/problems/design-add-and-search-words-data-structure/
+Apple,Maximum Product Subarray,Medium,Dynamic Programming,https://leetcode.com/problems/maximum-product-subarray/
+Apple,Linked List Cycle,Easy,Linked List,https://leetcode.com/problems/linked-list-cycle/
+Apple,Validate Binary Search Tree,Medium,Trees,https://leetcode.com/problems/validate-binary-search-tree/
+Apple,Decode Ways,Medium,Dynamic Programming,https://leetcode.com/problems/decode-ways/
+Apple,Find All Anagrams in a String,Medium,Sliding Window,https://leetcode.com/problems/find-all-anagrams-in-a-string/
+Apple,Climbing Stairs,Easy,Dynamic Programming,https://leetcode.com/problems/climbing-stairs/
+Netflix,Design Twitter,Medium,Design,https://leetcode.com/problems/design-twitter/
+Netflix,Implement Trie,Medium,Trie,https://leetcode.com/problems/implement-trie-prefix-tree/
+Netflix,Search in Rotated Sorted Array,Medium,Binary Search,https://leetcode.com/problems/search-in-rotated-sorted-array/
+Netflix,Daily Temperatures,Medium,Stack,https://leetcode.com/problems/daily-temperatures/
+Netflix,Unique Paths,Medium,Dynamic Programming,https://leetcode.com/problems/unique-paths/
+Uber,Alien Dictionary,Hard,Graph,https://leetcode.com/problems/alien-dictionary/
+Uber,Task Scheduler,Medium,Greedy,https://leetcode.com/problems/task-scheduler/
+Uber,Meeting Rooms II,Medium,Sorting,https://leetcode.com/problems/meeting-rooms-ii/
+Uber,Reconstruct Itinerary,Hard,Graph,https://leetcode.com/problems/reconstruct-itinerary/
+Uber,Permutations,Medium,Backtracking,https://leetcode.com/problems/permutations/
+Twitter,Design HashMap,Easy,Design,https://leetcode.com/problems/design-hashmap/
+Twitter,Kth Largest Element in an Array,Medium,Heap,https://leetcode.com/problems/kth-largest-element-in-an-array/
+Twitter,Word Search,Medium,Backtracking,https://leetcode.com/problems/word-search/
+Twitter,String to Integer (atoi),Medium,Strings,https://leetcode.com/problems/string-to-integer-atoi/
+Twitter,Flatten Nested List Iterator,Medium,Design,https://leetcode.com/problems/flatten-nested-list-iterator/
+LinkedIn,Maximum Depth of Binary Tree,Easy,Trees,https://leetcode.com/problems/maximum-depth-of-binary-tree/
+LinkedIn,Nested List Weight Sum,Medium,BFS/DFS,https://leetcode.com/problems/nested-list-weight-sum/
+LinkedIn,Shortest Word Distance,Easy,Arrays,https://leetcode.com/problems/shortest-word-distance/
+LinkedIn,Factor Combinations,Medium,Backtracking,https://leetcode.com/problems/factor-combinations/
+LinkedIn,Can Place Flowers,Easy,Greedy,https://leetcode.com/problems/can-place-flowers/
+Adobe,Rotate Image,Medium,Arrays,https://leetcode.com/problems/rotate-image/
+Adobe,Set Matrix Zeroes,Medium,Arrays,https://leetcode.com/problems/set-matrix-zeroes/
+Adobe,Pascal's Triangle,Easy,Arrays,https://leetcode.com/problems/pascals-triangle/
+Adobe,Find Peak Element,Medium,Binary Search,https://leetcode.com/problems/find-peak-element/
+Adobe,Palindrome Partitioning,Medium,Backtracking,https://leetcode.com/problems/palindrome-partitioning/
+Goldman Sachs,Largest Rectangle in Histogram,Hard,Stack,https://leetcode.com/problems/largest-rectangle-in-histogram/
+Goldman Sachs,Edit Distance,Hard,Dynamic Programming,https://leetcode.com/problems/edit-distance/
+Goldman Sachs,Jump Game,Medium,Greedy,https://leetcode.com/problems/jump-game/
+Goldman Sachs,Integer to Roman,Medium,Math,https://leetcode.com/problems/integer-to-roman/
+Goldman Sachs,House Robber,Medium,Dynamic Programming,https://leetcode.com/problems/house-robber/
+Salesforce,Combination Sum,Medium,Backtracking,https://leetcode.com/problems/combination-sum/
+Salesforce,Maximum Width of Binary Tree,Medium,Trees,https://leetcode.com/problems/maximum-width-of-binary-tree/
+Salesforce,Sort Colors,Medium,Arrays,https://leetcode.com/problems/sort-colors/
+Salesforce,Longest Increasing Subsequence,Medium,Dynamic Programming,https://leetcode.com/problems/longest-increasing-subsequence/
+Salesforce,Symmetric Tree,Easy,Trees,https://leetcode.com/problems/symmetric-tree/
+Oracle,Longest Common Prefix,Easy,Strings,https://leetcode.com/problems/longest-common-prefix/
+Oracle,Generate Parentheses,Medium,Backtracking,https://leetcode.com/problems/generate-parentheses/
+Oracle,Zigzag Conversion,Medium,Strings,https://leetcode.com/problems/zigzag-conversion/
+Oracle,Majority Element,Easy,Arrays,https://leetcode.com/problems/majority-element/
+Oracle,First Missing Positive,Hard,Arrays,https://leetcode.com/problems/first-missing-positive/
+IBM,Single Number,Easy,Bit Manipulation,https://leetcode.com/problems/single-number/
+IBM,Power of Two,Easy,Bit Manipulation,https://leetcode.com/problems/power-of-two/
+IBM,Roman to Integer,Easy,Math,https://leetcode.com/problems/roman-to-integer/
+IBM,Contains Duplicate,Easy,Hash Table,https://leetcode.com/problems/contains-duplicate/
+IBM,Intersection of Two Arrays II,Easy,Hash Table,https://leetcode.com/problems/intersection-of-two-arrays-ii/
+Nvidia,Matrix Chain Multiplication,Hard,Dynamic Programming,https://leetcode.com/problems/burst-balloons/
+Nvidia,Maximum Sum Circular Subarray,Medium,Dynamic Programming,https://leetcode.com/problems/maximum-sum-circular-subarray/
+Nvidia,N-Queens,Hard,Backtracking,https://leetcode.com/problems/n-queens/
+Nvidia,Surrounded Regions,Medium,BFS/DFS,https://leetcode.com/problems/surrounded-regions/
+Nvidia,Word Search II,Hard,Trie,https://leetcode.com/problems/word-search-ii/

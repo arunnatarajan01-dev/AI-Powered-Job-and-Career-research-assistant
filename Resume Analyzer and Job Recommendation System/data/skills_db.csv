@@ -1,0 +1,307 @@
+skill,category,aliases
+Python,Programming,python|py
+Java,Programming,java|jdk|jre
+JavaScript,Programming,javascript|js|ecmascript
+TypeScript,Programming,typescript|ts
+C,Programming,c programming|c language
+C++,Programming,c++|cpp|cplusplus
+C#,Programming,c#|csharp|c sharp
+Ruby,Programming,ruby
+Go,Programming,golang|go
+Rust,Programming,rust|rustlang
+Swift,Programming,swift
+Kotlin,Programming,kotlin
+PHP,Programming,php
+R,Programming,r programming|r language
+MATLAB,Programming,matlab
+Scala,Programming,scala
+Perl,Programming,perl
+Haskell,Programming,haskell
+Dart,Programming,dart
+Lua,Programming,lua
+Assembly,Programming,assembly|asm
+SQL,Database,sql|structured query language
+MySQL,Database,mysql
+PostgreSQL,Database,postgresql|postgres
+MongoDB,Database,mongodb|mongo
+Redis,Database,redis
+Cassandra,Database,cassandra
+Oracle,Database,oracle db|oracle database
+SQLite,Database,sqlite
+DynamoDB,Database,dynamodb
+Firebase,Database,firebase
+Elasticsearch,Database,elasticsearch|elastic search
+Neo4j,Database,neo4j
+MariaDB,Database,mariadb
+CouchDB,Database,couchdb
+React,Frontend Framework,react|reactjs|react.js
+Angular,Frontend Framework,angular|angularjs
+Vue,Frontend Framework,vue|vuejs|vue.js
+Next.js,Frontend Framework,next.js|nextjs
+Svelte,Frontend Framework,svelte|sveltejs
+jQuery,Frontend Framework,jquery
+Bootstrap,Frontend Framework,bootstrap
+Tailwind CSS,Frontend Framework,tailwindcss|tailwind css|tailwind
+Material UI,Frontend Framework,material ui|mui
+HTML,Frontend,html|html5
+CSS,Frontend,css|css3
+SASS,Frontend,sass|scss
+LESS,Frontend,less css
+Webpack,Frontend Tool,webpack
+Vite,Frontend Tool,vite
+Babel,Frontend Tool,babel
+Node.js,Backend Framework,node.js|nodejs|node
+Express,Backend Framework,express|expressjs|express.js
+Django,Backend Framework,django
+Flask,Backend Framework,flask
+Spring,Backend Framework,spring|spring boot|springboot
+Ruby on Rails,Backend Framework,rails|ruby on rails|ror
+Laravel,Backend Framework,laravel
+FastAPI,Backend Framework,fastapi|fast api
+ASP.NET,Backend Framework,asp.net|aspnet
+NestJS,Backend Framework,nestjs|nest.js
+GraphQL,API,graphql|graph ql
+REST APIs,API,rest api|restful|rest apis
+gRPC,API,grpc
+WebSocket,API,websocket|web socket
+Docker,DevOps,docker|containerization
+Kubernetes,DevOps,kubernetes|k8s
+Jenkins,DevOps,jenkins
+Terraform,DevOps,terraform
+Ansible,DevOps,ansible
+CI/CD,DevOps,ci/cd|cicd|continuous integration|continuous deployment
+GitLab CI,DevOps,gitlab ci|gitlab-ci
+GitHub Actions,DevOps,github actions
+AWS,Cloud,aws|amazon web services
+Azure,Cloud,azure|microsoft azure
+GCP,Cloud,gcp|google cloud|google cloud platform
+Heroku,Cloud,heroku
+DigitalOcean,Cloud,digitalocean|digital ocean
+Vercel,Cloud,vercel
+Netlify,Cloud,netlify
+Linux,Operating System,linux|ubuntu|debian|centos|fedora|redhat
+Windows Server,Operating System,windows server
+Bash,Scripting,bash|shell scripting|shell
+PowerShell,Scripting,powershell
+Git,Version Control,git
+GitHub,Version Control,github
+GitLab,Version Control,gitlab
+SVN,Version Control,svn|subversion
+Machine Learning,AI/ML,machine learning|ml
+Deep Learning,AI/ML,deep learning|dl
+TensorFlow,AI/ML,tensorflow|tf
+PyTorch,AI/ML,pytorch
+Scikit-learn,AI/ML,scikit-learn|sklearn|scikit learn
+Keras,AI/ML,keras
+NLP,AI/ML,nlp|natural language processing
+Computer Vision,AI/ML,computer vision|cv
+BERT,AI/ML,bert
+Transformers,AI/ML,transformers|transformer models
+Hugging Face,AI/ML,hugging face|huggingface
+OpenAI,AI/ML,openai|gpt|chatgpt
+LangChain,AI/ML,langchain
+MLOps,AI/ML,mlops|ml ops
+Neural Networks,AI/ML,neural network|neural networks|nn
+Reinforcement Learning,AI/ML,reinforcement learning|rl
+GANs,AI/ML,gan|gans|generative adversarial
+Pandas,Data Science,pandas
+NumPy,Data Science,numpy
+Matplotlib,Data Science,matplotlib
+Seaborn,Data Science,seaborn
+Tableau,Data Science,tableau
+Power BI,Data Science,power bi|powerbi
+Apache Spark,Data Science,apache spark|spark|pyspark
+Hadoop,Data Science,hadoop
+Airflow,Data Science,airflow|apache airflow
+Kafka,Data Science,kafka|apache kafka
+ETL,Data Science,etl
+Data Visualization,Data Science,data visualization|data viz
+Statistics,Data Science,statistics|statistical analysis
+Data Warehousing,Data Science,data warehousing|data warehouse
+Selenium,Testing,selenium|selenium webdriver
+Jest,Testing,jest
+Cypress,Testing,cypress
+JUnit,Testing,junit
+PyTest,Testing,pytest
+Mocha,Testing,mocha
+Test Automation,Testing,test automation|automated testing
+Manual Testing,Testing,manual testing
+API Testing,Testing,api testing
+Performance Testing,Testing,performance testing|load testing
+Figma,Design,figma
+Adobe XD,Design,adobe xd
+Sketch,Design,sketch
+Adobe Photoshop,Design,photoshop|adobe photoshop
+Illustrator,Design,illustrator|adobe illustrator
+InDesign,Design,indesign|adobe indesign
+Canva,Design,canva
+Wireframing,Design,wireframing|wireframes
+Prototyping,Design,prototyping|prototype
+User Research,Design,user research
+Usability Testing,Design,usability testing
+Design Thinking,Design,design thinking
+UI/UX,Design,ui/ux|ui ux|uiux|user interface|user experience
+Responsive Design,Design,responsive design|responsive web design
+Typography,Design,typography
+Color Theory,Design,color theory
+Branding,Design,branding|brand design
+Visual Design,Design,visual design
+Network Security,Security,network security
+Penetration Testing,Security,penetration testing|pen testing|pentest
+SIEM,Security,siem
+Firewalls,Security,firewall|firewalls
+Cryptography,Security,cryptography|encryption
+OWASP,Security,owasp
+Incident Response,Security,incident response
+Compliance,Security,compliance|regulatory compliance
+Vulnerability Assessment,Security,vulnerability assessment
+Security Auditing,Security,security audit|security auditing
+Agile,Methodology,agile|agile methodology
+Scrum,Methodology,scrum
+Kanban,Methodology,kanban
+JIRA,Project Management,jira
+Trello,Project Management,trello
+Asana,Project Management,asana
+Confluence,Project Management,confluence
+MS Project,Project Management,ms project|microsoft project
+Monday.com,Project Management,monday.com
+Notion,Project Management,notion
+Six Sigma,Methodology,six sigma
+SAP,Enterprise,sap
+ERP,Enterprise,erp|enterprise resource planning
+CRM,Enterprise,crm|customer relationship management
+Salesforce,Enterprise,salesforce
+ServiceNow,Enterprise,servicenow
+Microservices,Architecture,microservices|microservice
+System Design,Architecture,system design
+API Design,Architecture,api design
+Event-Driven Architecture,Architecture,event driven|event-driven architecture
+Distributed Systems,Architecture,distributed systems
+Serverless,Architecture,serverless
+SOA,Architecture,soa|service oriented architecture
+Communication,Soft Skill,communication|communication skills
+Leadership,Soft Skill,leadership|leadership skills
+Problem Solving,Soft Skill,problem solving|problem-solving
+Teamwork,Soft Skill,teamwork|team player|collaboration
+Critical Thinking,Soft Skill,critical thinking
+Time Management,Soft Skill,time management
+Adaptability,Soft Skill,adaptability|flexible
+Creativity,Soft Skill,creativity|creative thinking
+Presentation,Soft Skill,presentation|presentation skills
+Negotiation,Soft Skill,negotiation
+Mentoring,Soft Skill,mentoring|coaching
+Decision Making,Soft Skill,decision making|decision-making
+Conflict Resolution,Soft Skill,conflict resolution
+Project Management,Management,project management
+Product Strategy,Management,product strategy|product management
+Roadmapping,Management,roadmapping|product roadmap
+Sprint Planning,Management,sprint planning
+Retrospectives,Management,retrospectives|retro
+Stakeholder Management,Management,stakeholder management
+Risk Management,Management,risk management
+Budget Management,Management,budget|budgeting
+Vendor Management,Management,vendor management
+Change Management,Management,change management
+Data Structures,Computer Science,data structures|data structure
+Algorithms,Computer Science,algorithms|algorithm
+Object-Oriented Programming,Computer Science,oop|object oriented|object-oriented
+Functional Programming,Computer Science,functional programming|fp
+Design Patterns,Computer Science,design patterns
+Operating Systems,Computer Science,operating systems|os
+Computer Networks,Computer Science,computer networks|networking
+Database Design,Computer Science,database design|db design
+Compiler Design,Computer Science,compiler design|compilers
+Software Engineering,Computer Science,software engineering
+SEO,Marketing,seo|search engine optimization
+SEM,Marketing,sem|search engine marketing
+Google Analytics,Marketing,google analytics
+Google Ads,Marketing,google ads|adwords
+Social Media,Marketing,social media|social media marketing
+Content Marketing,Marketing,content marketing
+Email Marketing,Marketing,email marketing
+A/B Testing,Marketing,a/b testing|ab testing
+Copywriting,Marketing,copywriting|copy writing
+Marketing Strategy,Marketing,marketing strategy
+React Native,Mobile,react native
+Flutter,Mobile,flutter
+iOS Development,Mobile,ios|ios development
+Android Development,Mobile,android|android development
+Mobile Development,Mobile,mobile development|mobile app
+SwiftUI,Mobile,swiftui
+Kotlin Multiplatform,Mobile,kotlin multiplatform|kmp
+Xamarin,Mobile,xamarin
+Unity,Game Dev,unity|unity3d
+Unreal Engine,Game Dev,unreal engine|unreal
+Game Design,Game Dev,game design
+3D Modeling,Game Dev,3d modeling
+Blender,Game Dev,blender
+Godot,Game Dev,godot
+Solidity,Blockchain,solidity
+Ethereum,Blockchain,ethereum|eth
+Smart Contracts,Blockchain,smart contracts
+Web3,Blockchain,web3|web3.js
+DeFi,Blockchain,defi|decentralized finance
+NFT,Blockchain,nft|non-fungible token
+Blockchain,Blockchain,blockchain
+ROS,Robotics,ros|robot operating system
+Arduino,Hardware,arduino
+Raspberry Pi,Hardware,raspberry pi|rpi
+IoT,Hardware,iot|internet of things
+Embedded Systems,Hardware,embedded systems|embedded
+RTOS,Hardware,rtos|real-time operating system
+Microcontrollers,Hardware,microcontroller|microcontrollers|mcu
+Sensors,Hardware,sensors
+PCB Design,Hardware,pcb design|pcb
+FPGA,Hardware,fpga
+SPI,Hardware,spi
+I2C,Hardware,i2c
+JTAG,Hardware,jtag
+GIS,Science,gis|geographic information system
+Bioinformatics,Science,bioinformatics
+Genomics,Science,genomics
+Environmental Science,Science,environmental science
+Lab Skills,Science,lab skills|laboratory
+R&D,Science,r&d|research and development
+CAD,Engineering,cad|computer aided design
+SolidWorks,Engineering,solidworks
+AutoCAD,Engineering,autocad
+CATIA,Engineering,catia
+Simulation,Engineering,simulation
+FEA,Engineering,fea|finite element analysis
+CFD,Engineering,cfd|computational fluid dynamics
+Control Systems,Engineering,control systems
+Signal Processing,Engineering,signal processing
+Excel,Office,excel|microsoft excel
+PowerPoint,Office,powerpoint|microsoft powerpoint
+Word,Office,word|microsoft word
+Outlook,Office,outlook|microsoft outlook
+Google Workspace,Office,google workspace|g suite|gsuite
+Technical Writing,Content,technical writing
+Documentation,Content,documentation|docs
+API Documentation,Content,api documentation|api docs
+Markdown,Content,markdown
+Content Strategy,Content,content strategy
+Editing,Content,editing|copy editing
+Blog Writing,Content,blog writing|blogging
+Financial Modeling,Finance,financial modeling
+Accounting,Finance,accounting
+Budgeting,Finance,budgeting|budget planning
+Forecasting,Finance,forecasting|financial forecasting
+Valuation,Finance,valuation
+Risk Analysis,Finance,risk analysis
+Recruitment,HR,recruitment|hiring|talent acquisition
+Employee Relations,HR,employee relations
+HR Policies,HR,hr policies|human resources policies
+Payroll,HR,payroll
+HRIS,HR,hris|hr information system
+Training,HR,training|training and development
+Onboarding,HR,onboarding
+Performance Management,HR,performance management
+Supply Chain Management,Operations,supply chain|supply chain management|scm
+Logistics,Operations,logistics
+Inventory Management,Operations,inventory management
+Process Improvement,Operations,process improvement
+Quality Assurance,Operations,quality assurance|qa
+Operations Management,Operations,operations management
+Lean,Operations,lean|lean management
+Procurement,Operations,procurement

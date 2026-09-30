@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Prepare for interviews with company-specific questions and curated coding challenges from top tech companies.">
+    <title>Interview Practice | AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animated"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <a href="/" class="nav-brand">
+            <div class="brand-icon">🧠</div>
+            <span>ResumeAI</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="/">Hub</a></li>
+            <li><a href="/resume">Home</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/practice" class="active">Practice</a></li>
+        </ul>
+    </nav>
+
+    <div class="practice-page">
+        <div class="practice-container">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <h1>🎯 Interview <span class="text-gradient">Practice Hub</span></h1>
+                <p class="summary-text">Prepare for your dream job with company-specific interview questions and curated coding challenges from top tech companies.</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="practice-tabs">
+                <button class="practice-tab active" data-tab="interview" id="tab-interview">
+                    🎤 Interview Questions
+                </button>
+                <button class="practice-tab" data-tab="coding" id="tab-coding">
+                    💻 Coding Practice
+                </button>
+            </div>
+
+            <!-- ===== Interview Questions Tab ===== -->
+            <div class="tab-content active" id="content-interview">
+                <!-- Company Grid -->
+                {% set logo_map = {
+                    'Adobe': 'adobe',
+                    'Amazon': 'amazon',
+                    'Apple': 'apple',
+                    'Goldman Sachs': 'goldmansachs',
+                    'Google': 'google',
+                    'IBM': 'ibm',
+                    'LinkedIn': 'linkedin',
+                    'Meta': 'meta',
+                    'Microsoft': 'microsoft',
+                    'Netflix': 'netflix',
+                    'Oracle': 'oracle',
+                    'Salesforce': 'salesforce',
+                    'Uber': 'uber'
+                } %}
+                <div class="company-grid" id="interviewCompanyGrid">
+                    {% for company in companies_interview %}
+                    <div class="company-card" data-company="{{ company }}" onclick="selectInterviewCompany('{{ company }}')">
+                        <div class="company-logo">
+                            {% set slug = logo_map.get(company.strip()) %}
+                            {% if slug %}
+                                <img src="https://unpkg.com/simple-icons@v13/icons/{{ slug }}.svg" alt="{{ company }}">
+                            {% else %}
+                                🏢
+                            {% endif %}
+                        </div>
+                        <div class="company-name">{{ company }}</div>
+                        <div class="company-count">
+                            {% if company_stats.get(company) %}
+                                {{ company_stats[company].total }} questions
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Filters -->
+                <div class="filter-bar" id="interviewFilters" style="display: none;">
+                    <select class="filter-select" id="interviewCategoryFilter" onchange="filterInterviewQuestions()">
+                        <option value="">All Categories</option>
+                        <option value="Behavioral">Behavioral</option>
+                        <option value="Technical">Technical</option>
+                        <option value="System Design">System Design</option>
+                    </select>
+                    <select class="filter-select" id="interviewDifficultyFilter" onchange="filterInterviewQuestions()">
+                        <option value="">All Difficulties</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+
+                <!-- Questions List -->
+                <div class="questions-container" id="interviewQuestions"></div>
+            </div>
+
+            <!-- ===== Coding Practice Tab ===== -->
+            <div class="tab-content" id="content-coding">
+                <h3 style="margin-bottom: 1.5rem;">Select a Company</h3>
+
+                <!-- Company Grid -->
+                <div class="company-grid" id="codingCompanyGrid">
+                    {% for company in companies_coding %}
+                    <div class="company-card" data-company="{{ company }}" onclick="selectCodingCompany('{{ company }}')">
+                        <div class="company-logo">
+                            {% set slug = logo_map.get(company.strip()) %}
+                            {% if slug %}
+                                <img src="https://unpkg.com/simple-icons@v13/icons/{{ slug }}.svg" alt="{{ company }}">
+                            {% else %}
+                                🏢
+                            {% endif %}
+                        </div>
+                        <div class="company-name">{{ company }}</div>
+                        <div class="company-count">
+                            {% if coding_stats.get(company) %}
+                                {{ coding_stats[company].total }} problems
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Filters -->
+                <div class="filter-bar" id="codingFilters" style="display: none;">
+                    <select class="filter-select" id="codingTopicFilter" onchange="filterCodingQuestions()">
+                        <option value="">All Topics</option>
+                        {% for topic in topics %}
+                        <option value="{{ topic }}">{{ topic }}</option>
+                        {% endfor %}
+                    </select>
+                    <select class="filter-select" id="codingDifficultyFilter" onchange="filterCodingQuestions()">
+                        <option value="">All Difficulties</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+
+                <!-- Coding Questions List -->
+                <div class="questions-container" id="codingQuestions"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Built with 🧠 AI &amp; ❤️ | AI Resume Analyzer &amp; Job Recommendation System</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/resume_script.js') }}"></script>
+    <script>
+        // ---- Practice Page Logic ----
+        let currentInterviewCompany = null;
+        let currentCodingCompany = null;
+        let interviewData = [];
+        let codingData = [];
+
+        // Tab switching
+        document.querySelectorAll('.practice-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.practice-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('content-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ---- Interview Questions ----
+        async function selectInterviewCompany(company) {
+            currentInterviewCompany = company;
+            
+            // Highlight selected card
+            document.querySelectorAll('#interviewCompanyGrid .company-card').forEach(card => {
+                card.classList.toggle('selected', card.dataset.company === company);
+            });
+
+            // Show filters
+            document.getElementById('interviewFilters').style.display = 'flex';
+
+            // Fetch questions
+            try {
+                const res = await fetch(`/api/interview-questions/${encodeURIComponent(company)}`);
+                interviewData = await res.json();
+                renderInterviewQuestions(interviewData);
+            } catch (err) {
+                console.error('Error fetching interview questions:', err);
+            }
+        }
+
+        function filterInterviewQuestions() {
+            const category = document.getElementById('interviewCategoryFilter').value;
+            const difficulty = document.getElementById('interviewDifficultyFilter').value;
+
+            let filtered = interviewData;
+            if (category) filtered = filtered.filter(q => q.category === category);
+            if (difficulty) filtered = filtered.filter(q => q.difficulty === difficulty);
+
+            renderInterviewQuestions(filtered);
+        }
+
+        function renderInterviewQuestions(questions) {
+            const container = document.getElementById('interviewQuestions');
+            
+            if (!questions.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <p>No questions found for this filter. Try adjusting your filters.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = questions.map((q, i) => `
+                <div class="practice-question-card" style="animation: fadeInUp 0.4s ease ${i * 0.05}s both;">
+                    <span class="question-difficulty difficulty-${q.difficulty}">${q.difficulty}</span>
+                    <div class="question-content">
+                        <h4>${q.question}</h4>
+                        <div class="question-meta">
+                            <span>📁 ${q.category}</span>
+                            <span>🏢 ${q.company}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ---- Coding Practice ----
+        async function selectCodingCompany(company) {
+            currentCodingCompany = company;
+            
+            // Highlight selected card
+            document.querySelectorAll('#codingCompanyGrid .company-card').forEach(card => {
+                card.classList.toggle('selected', card.dataset.company === company);
+            });
+
+            // Show filters
+            document.getElementById('codingFilters').style.display = 'flex';
+
+            // Fetch questions
+            try {
+                const res = await fetch(`/api/coding-practice/${encodeURIComponent(company)}`);
+                codingData = await res.json();
+                renderCodingQuestions(codingData);
+            } catch (err) {
+                console.error('Error fetching coding questions:', err);
+            }
+        }
+
+        function filterCodingQuestions() {
+            const topic = document.getElementById('codingTopicFilter').value;
+            const difficulty = document.getElementById('codingDifficultyFilter').value;
+
+            let filtered = codingData;
+            if (topic) filtered = filtered.filter(q => q.topic === topic);
+            if (difficulty) filtered = filtered.filter(q => q.difficulty === difficulty);
+
+            renderCodingQuestions(filtered);
+        }
+
+        function renderCodingQuestions(questions) {
+            const container = document.getElementById('codingQuestions');
+            
+            if (!questions.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <p>No problems found. Try adjusting your filters.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = questions.map((q, i) => `
+                <div class="practice-question-card" style="animation: fadeInUp 0.4s ease ${i * 0.05}s both;">
+                    <span class="question-difficulty difficulty-${q.difficulty}">${q.difficulty}</span>
+                    <div class="question-content">
+                        <h4>${q.question}</h4>
+                        <div class="question-meta">
+                            <span>📂 ${q.topic}</span>
+                            <span>🏢 ${q.company}</span>
+                        </div>
+                    </div>
+                    <a href="${q.link}" target="_blank" rel="noopener noreferrer" class="question-link">
+                        Solve →
+                    </a>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

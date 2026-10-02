@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluation | AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
+</head>
+<body class="evaluation-body">
+    <div class="bg-animated"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    {% set nav_active = 'evaluation' %}
+    {% include '_nav.html' %}
+
+    <div class="review-page">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>Status, score, and <span class="text-gradient">share</span></h1>
+                <p class="summary-text">
+                    Positive cases record the outcome the screen is built for. Negative cases are blocked, or they save a decision the next role should not accept.
+                    {% if user %}Signed in as {{ user.name }}.{% endif %}
+                </p>
+            </div>
+
+            <div class="review-stats">
+                <div class="review-stat warn"><strong>{{ case.ats_percentage }}</strong><span>ATS score</span></div>
+                <div class="review-stat"><strong>{{ case.skill_match }}%</strong><span>Skill match</span></div>
+                <div class="review-stat"><strong style="font-size: 1.05rem;">{{ state.status }}</strong><span>Status</span></div>
+                <div class="review-stat"><strong style="font-size: 1.05rem;">{{ state.share or 'Not granted' }}</strong><span>Share</span></div>
+            </div>
+            <p class="summary-text" style="margin-bottom: 1rem;">
+                Live case {{ case.filename }} · {{ case.ats_score }} · audit {{ state.audit_status }} · candidate notice {{ state.candidate_notice or 'Not recorded' }}
+            </p>
+
+            <div class="review-switch">
+                <a href="{{ url_for('review_scenarios_page', role='all', kind=selected_kind) }}" class="{{ 'active' if selected_role == 'all' else '' }}">All roles</a>
+                {% for key, meta in role_labels.items() %}
+                <a href="{{ url_for('review_scenarios_page', role=key, kind=selected_kind) }}" class="{{ 'active' if selected_role == key else '' }}">{{ meta.label }}</a>
+                {% endfor %}
+            </div>
+            <div class="review-tabs">
+                <a href="{{ url_for('review_scenarios_page', role=selected_role, kind='all') }}" class="{{ 'active' if selected_kind == 'all' else '' }}">All outcomes</a>
+                <a href="{{ url_for('review_scenarios_page', role=selected_role, kind='positive') }}" class="{{ 'active' if selected_kind == 'positive' else '' }}">Positive</a>
+                <a href="{{ url_for('review_scenarios_page', role=selected_role, kind='negative') }}" class="{{ 'active' if selected_kind == 'negative' else '' }}">Negative</a>
+            </div>
+
+            <div class="scenario-list">
+                {% for item in cases %}
+                <article class="scenario-card {{ item.kind }}">
+                    <div class="review-kicker">{{ item.role_label }} · {{ item.kind_label }} · {{ item.focus }}</div>
+                    <h3>{{ item.use_case }}</h3>
+                    <p><strong>Starting point.</strong> {{ item.start }}</p>
+                    <p><strong>Expected result.</strong> {{ item.result }}</p>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

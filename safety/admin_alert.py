@@ -28,7 +28,7 @@ def _smtp_settings():
         port = int(port_raw)
     except ValueError:
         port = 587
-    ready = bool(host and user and password and recipient and sender)
+    ready = bool(host and user and password and sender)
     return {
         "ready": ready,
         "host": host,
@@ -93,7 +93,7 @@ def notify_admin(*, endpoint, category, reason, field, excerpt, remote_addr):
     }
     _write_log(record)
     settings = _smtp_settings()
-    if not settings["ready"]:
+    if not settings["ready"] or not settings["recipient"]:
         print("Admin email is not configured. Alert saved to logs/admin_alerts.log")
         return {"logged": True, "emailed": False}
 

@@ -87,6 +87,7 @@
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    scrollbar-gutter: stable;
 }
 
 body {
@@ -329,6 +330,62 @@ body {
 
 .nav-links a.active::after {
     width: 80%;
+}
+
+.navbar.app-nav {
+    justify-content: flex-start;
+}
+
+.navbar.app-nav .nav-links {
+    flex: 1;
+    margin-left: 1.5rem;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+}
+
+.navbar.app-nav .nav-signout {
+    margin-left: auto;
+    flex: 0 0 auto;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: var(--space-sm) var(--space-md);
+    white-space: nowrap;
+}
+
+.navbar.app-nav .nav-signout:hover {
+    color: #fff;
+}
+
+.evaluation-body {
+    background:
+        radial-gradient(ellipse 70% 45% at 10% 0%, rgba(186, 230, 160, 0.28), transparent 55%),
+        linear-gradient(165deg, #1b6b38 0%, #2a8f4a 48%, #34a35a 100%);
+}
+
+.evaluation-body .bg-animated,
+.evaluation-body .orb {
+    display: none;
+}
+
+.evaluation-body .navbar {
+    background: rgba(24, 102, 50, 0.92);
+}
+
+.practice-body {
+    background:
+        radial-gradient(ellipse 70% 45% at 8% 0%, rgba(150, 220, 230, 0.28), transparent 55%),
+        linear-gradient(165deg, #0d4f73 0%, #146888 48%, #1a8a86 100%);
+}
+
+.practice-body .bg-animated,
+.practice-body .orb {
+    display: none;
+}
+
+.practice-body .navbar {
+    background: rgba(12, 72, 102, 0.92);
 }
 
 /* ---- Hero Section ---- */
@@ -1785,6 +1842,10 @@ body {
     
     .nav-links {
         display: none;
+    }
+
+    .navbar.app-nav .nav-links {
+        display: flex;
     }
     
     .hero h1 {

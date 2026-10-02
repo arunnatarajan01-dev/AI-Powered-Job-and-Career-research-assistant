@@ -1,0 +1,11 @@
+[
+  {"id": "li-blr-1", "title": "Machine Learning Engineer", "company": "Northwind Analytics", "location": "Bengaluru", "posted_days_ago": 0, "employment_type": "Full-time", "snippet": "Build ranking models and review feature quality with the search team."},
+  {"id": "li-blr-2", "title": "Data Analyst", "company": "Harbor Systems", "location": "Bengaluru", "posted_days_ago": 3, "employment_type": "Full-time", "snippet": "Turn product metrics into weekly decision notes for the growth group."},
+  {"id": "li-blr-3", "title": "Backend Engineer", "company": "Lattice Works", "location": "Bengaluru", "posted_days_ago": 18, "employment_type": "Full-time", "snippet": "Own APIs for the hiring workflow and the audit log."},
+  {"id": "li-mum-1", "title": "Software Engineer", "company": "Bluepeak", "location": "Mumbai", "posted_days_ago": 0, "employment_type": "Full-time", "snippet": "Ship services used by the payments desk."},
+  {"id": "li-mum-2", "title": "Platform Engineer", "company": "Bluepeak", "location": "Mumbai", "posted_days_ago": 9, "employment_type": "Full-time", "snippet": "Keep the internal developer platform reliable."},
+  {"id": "li-hyd-1", "title": "Java Developer", "company": "Indus Cloud", "location": "Hyderabad", "posted_days_ago": 1, "employment_type": "Full-time", "snippet": "Extend the order service and its test suite."},
+  {"id": "li-del-1", "title": "DevOps Engineer", "company": "Indus Cloud", "location": "Delhi", "posted_days_ago": 6, "employment_type": "Full-time", "snippet": "Improve release checks for the production cluster."},
+  {"id": "li-pun-1", "title": "QA Engineer", "company": "Sable Labs", "location": "Pune", "posted_days_ago": 0, "employment_type": "Full-time", "snippet": "Design regression coverage for the resume parser."},
+  {"id": "li-che-1", "title": "Frontend Engineer", "company": "Sable Labs", "location": "Chennai", "posted_days_ago": 14, "employment_type": "Full-time", "snippet": "Build the candidate job-search screens."}
+]

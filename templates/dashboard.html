@@ -15,25 +15,24 @@
     <div class="orb orb-2"></div>
 
     <!-- Navigation -->
-    <nav class="navbar" id="navbar">
-        <a href="/" class="nav-brand">
-            <div class="brand-icon">🧠</div>
-            <span>ResumeAI</span>
-        </a>
-        <ul class="nav-links">
-            <li><a href="/">Hub</a></li>
-            <li><a href="/resume">Home</a></li>
-            <li><a href="/dashboard" class="active">Dashboard</a></li>
-            <li><a href="/practice">Practice</a></li>
-        </ul>
-    </nav>
+    {% set nav_active = 'dashboard' %}
+    {% include '_nav.html' %}
 
     <div class="dashboard">
         <div class="dashboard-container">
+            {% if not result %}
+            <div class="dashboard-header">
+                <h1>Dashboard</h1>
+                <p class="summary-text">No resume analysis is stored for this session.</p>
+            </div>
+            {% else %}
             <!-- Header -->
             <div class="dashboard-header">
                 <h1>📊 Resume Analysis <span class="text-gradient">Dashboard</span></h1>
                 <p class="summary-text">{{ result.summary }}</p>
+                <p style="margin-top: 0.8rem;">
+                    <a class="nav-signout" href="{{ url_for('dashboard_export') }}">Download Excel</a>
+                </p>
             </div>
 
             <!-- ATS Score Section -->
@@ -120,6 +119,17 @@
             <!-- Job Recommendations -->
             <div class="full-section stagger-3">
                 <h3><span class="card-icon">💼</span> Top Job Recommendations</h3>
+                {% if current_user and current_user.role == 'candidate' %}
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    Search these roles on LinkedIn and Naukri from your candidate account.
+                    <a href="{{ url_for('job_discovery') }}">Open job discovery</a>
+                </p>
+                {% else %}
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    <a href="{{ url_for('login', next='/jobs') }}">Sign in as a candidate</a>
+                    to search these roles on LinkedIn and Naukri.
+                </p>
+                {% endif %}
                 <div class="dashboard-grid">
                     {% for job in result.recommendations[:6] %}
                     <div class="job-card">
@@ -154,6 +164,11 @@
                             <span class="job-skill-tag missing">✗ {{ skill }}</span>
                             {% endfor %}
                         </div>
+                        {% if current_user and current_user.role == 'candidate' %}
+                        <div style="margin-top: 0.75rem;">
+                            <a href="{{ url_for('job_discovery', keyword=job.title, location=job.location, posted='week') }}&amp;provider=linkedin&amp;provider=naukri">Search LinkedIn and Naukri</a>
+                        </div>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
@@ -285,13 +300,14 @@
 
             <!-- Action Buttons -->
             <div style="text-align: center; padding: 2rem 0;">
-                <a href="/resume" class="btn-analyze show" style="display: inline-block; width: auto; text-decoration: none;">
-                    <span>🔄 Analyze Another Resume</span>
+                <a href="/review" class="btn-analyze show" style="display: inline-block; width: auto; text-decoration: none;">
+                    <span>Review this analysis</span>
                 </a>
                 <a href="/practice" class="btn-analyze show" style="display: inline-block; width: auto; text-decoration: none; margin-left: 1rem; background: linear-gradient(135deg, #00d4aa, #7c5cfc);">
                     <span>🎯 Practice Interview</span>
                 </a>
             </div>
+            {% endif %}
         </div>
     </div>
 

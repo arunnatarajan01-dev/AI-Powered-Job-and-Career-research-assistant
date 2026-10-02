@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Observability | AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
+</head>
+<body class="evaluation-body">
+    <div class="bg-animated"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    {% set nav_active = 'observability' %}
+    {% include '_nav.html' %}
+
+    <div class="review-page">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>Observability and <span class="text-gradient">evaluations</span></h1>
+                <p class="summary-text">
+                    Each resume analysis, research call, job search, and human review passes through middleware, then an orchestrator hands the work to a specialist agent.
+                    Research answers are written from retrieved passages. Job search and paper drafts run by tool call.
+                    The evaluation suite scores that pipeline, guardrails, ATS bounds, the job date window, and review rules. It does not call Gemini.
+                    {% if user %}Signed in as {{ user.name }}.{% endif %}
+                </p>
+            </div>
+
+            <div class="review-stats">
+                <div class="review-stat"><strong>{{ summary.count }}</strong><span>Traces</span></div>
+                <div class="review-stat"><strong>{{ summary.mean_ms }}</strong><span>Mean ms</span></div>
+                <div class="review-stat warn"><strong>{{ summary.errors }}</strong><span>Errors</span></div>
+                <div class="review-stat"><strong>{{ summary.blocked }}</strong><span>Blocked</span></div>
+                <div class="review-stat"><strong>{{ report.score }}%</strong><span>Eval score</span></div>
+            </div>
+
+            <h2 class="observe-heading">Middleware</h2>
+            <article class="scenario-card">
+                <div class="review-kicker">Every agent action</div>
+                <ol class="middleware-steps">
+                    {% for step in middleware_steps %}
+                    <li><strong>{{ step.name }}</strong> — {{ step.detail }}</li>
+                    {% endfor %}
+                </ol>
+            </article>
+
+            <h2 class="observe-heading">Evaluations · {{ report.passed }} passed · {{ report.failed }} failed</h2>
+            <div class="scenario-list">
+                {% for check in report.checks %}
+                <article class="scenario-card {{ 'positive' if check.passed else 'negative' }}">
+                    <div class="review-kicker">{{ 'Pass' if check.passed else 'Fail' }} · {{ check.id }}</div>
+                    <h3>{{ check.name }}</h3>
+                    <p>{{ check.detail }}</p>
+                </article>
+                {% endfor %}
+            </div>
+
+            <h2 class="observe-heading">Recent traces</h2>
+            <div class="scenario-list">
+                {% for item in traces %}
+                <article class="scenario-card {{ item.status }}">
+                    <div class="review-kicker">{{ item.status }} · {{ item.duration_ms }} ms · {{ item.started_at }}</div>
+                    <h3>{{ item.name }}</h3>
+                    <p>{{ item.actor }} · {{ item.route }}{% if item.error %} · {{ item.error }}{% endif %}</p>
+                    {% if item.span_lines %}
+                    <ul class="trace-spans">
+                        {% for line in item.span_lines %}
+                        <li>{{ line }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </article>
+                {% else %}
+                <article class="scenario-card">
+                    <h3>No traces yet</h3>
+                    <p>Analyze a resume, search jobs, or record a review decision. This page also writes a probe trace when evaluations run.</p>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

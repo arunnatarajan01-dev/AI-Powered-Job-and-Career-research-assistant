@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
     <style>
         :root {
             --bg-dark: #0c2416;
@@ -65,30 +66,6 @@
             100% { transform: translate(50px, 50px) scale(1.1); }
         }
 
-        /* Navbar */
-        .navbar {
-            padding: 2rem 4rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .logo {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-
-        .logo span {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
         /* Main Content */
         main {
             flex: 1;
@@ -96,7 +73,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 4rem 2rem;
+            padding: 7rem 2rem 4rem;
             text-align: center;
         }
 
@@ -110,7 +87,7 @@
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 3rem;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1280px;
         }
 
         .hub-card {
@@ -137,7 +114,15 @@
 
         .hub-card .icon { font-size: 4rem; margin-bottom: 2rem; filter: drop-shadow(0 0 10px var(--primary)); }
         .hub-card h2 { font-size: 2rem; margin-bottom: 1rem; font-family: 'Outfit', sans-serif; }
-        .hub-card p { color: var(--text-muted); line-height: 1.5; margin-bottom: 2rem; }
+        .hub-card p {
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 2rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
 
         .btn-enter {
             padding: 12px 30px;
@@ -181,12 +166,8 @@
         <div class="glow glow-2"></div>
     </div>
 
-    <header class="navbar">
-        <div class="logo">Integrate<span>AI</span></div>
-        <div class="nav-right">
-            <span style="color: var(--text-muted); font-size: 0.9rem;">Empowering Future Researchers</span>
-        </div>
-    </header>
+    {% set nav_active = 'hub' %}
+    {% include '_nav.html' %}
 
     <main>
         <div class="hero">
@@ -195,18 +176,34 @@
         </div>
 
         <div class="hub-grid">
-            <a href="/resume" class="hub-card">
+            {% if current_user.role == 'candidate' %}
+            <a href="{{ url_for('job_discovery') }}" class="hub-card">
                 <div class="icon">📄</div>
-                <h2>AI Resume Analyzer</h2>
-                <p>Upload your resume for deep ATS scoring, skill gap analysis, and tailored job recommendations using BERT transformers.</p>
-                <div class="btn-enter">Enter Laboratory</div>
+                <h2>AI Resume Analyzer and Job Discovery</h2>
+                <p>Upload a resume for ATS scoring, skill gaps, and job matches. Search LinkedIn and Naukri by location for today, last week, or last month.</p>
+                <div class="btn-enter">Open</div>
             </a>
+            {% else %}
+            <a href="/review" class="hub-card">
+                <div class="icon">🗂️</div>
+                <h2>HITL Review</h2>
+                <p>Approve, reject, or correct a resume screening decision for this role.</p>
+                <div class="btn-enter">Open review</div>
+            </a>
+            {% endif %}
 
             <a href="/research" class="hub-card">
                 <div class="icon">⚛️</div>
                 <h2>Research Assistant</h2>
                 <p>Construct IEEE-standard research papers from code repositories and deconstruct complex PDFs with document-grounded AI.</p>
                 <div class="btn-enter">Enter Research Lab</div>
+            </a>
+
+            <a href="{{ url_for('observability_page') }}" class="hub-card">
+                <div class="icon">📈</div>
+                <h2>Observability and Evaluations</h2>
+                <p>Inspect the middleware around each agent step, the traces those steps leave, and the local checks for guardrails, scores, and human-review rules.</p>
+                <div class="btn-enter">Open</div>
             </a>
         </div>
     </main>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job discovery | AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
+</head>
+<body class="jobs-body">
+    <div class="bg-animated"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    {% set nav_active = 'jobs' %}
+    {% include '_nav.html' %}
+
+    <div class="review-page">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>AI Resume Analyzer and <span class="text-gradient">Job Discovery</span></h1>
+                <p class="summary-text summary-clamp">Signed in as {{ user.name }}. Search LinkedIn and Naukri by location for today, last week, or last month.</p>
+            </div>
+
+            <form class="review-panel" method="get" action="{{ url_for('job_discovery') }}">
+                <div class="field">
+                    <label for="keyword">Role</label>
+                    <input id="keyword" name="keyword" type="text" value="{{ keyword or 'software engineer' }}" placeholder="software engineer">
+                </div>
+                <div class="field">
+                    <label for="location">Current location</label>
+                    <input id="location" name="location" type="text" value="{{ location }}" placeholder="Bengaluru" required>
+                </div>
+                <div class="review-actions" style="margin-bottom: 0.9rem;">
+                    <button type="button" id="useLocation" class="secondary-action">Use current location</button>
+                    <span class="missing-note" id="locationStatus"></span>
+                </div>
+                <div class="review-kicker">Posted</div>
+                <div class="check-row">
+                    {% for key, label in posted_labels %}
+                    <label class="check-row">
+                        <input type="radio" name="posted" value="{{ key }}" {% if posted == key %}checked{% endif %}>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="review-kicker">Providers</div>
+                <label class="check-row">
+                    <input type="checkbox" name="provider" value="linkedin" {% if 'linkedin' in selected %}checked{% endif %}>
+                    <span>LinkedIn</span>
+                </label>
+                <label class="check-row">
+                    <input type="checkbox" name="provider" value="naukri" {% if 'naukri' in selected %}checked{% endif %}>
+                    <span>Naukri</span>
+                </label>
+                {% if error %}
+                <div class="banner err">{{ error }}</div>
+                {% endif %}
+                <div class="review-actions">
+                    <button type="submit">Search jobs</button>
+                </div>
+            </form>
+
+            {% if searched %}
+            <div class="review-actions" style="margin-top: 1rem;">
+                <a class="nav-signout" href="{{ url_for('job_export', location=location, keyword=keyword, posted=posted, provider=selected) }}">Download Excel</a>
+            </div>
+            <div class="scenario-list" style="margin-top: 1.25rem;">
+                {% for result in results %}
+                <section class="review-panel">
+                    <div class="review-kicker">{{ result.label }} · {{ result.jobs|length }} · {{ result.mode|replace('_', ' ') }}</div>
+                    <h2 style="font-size: 1.15rem; margin-bottom: 0.4rem;">{{ result.label }}</h2>
+                    <p class="summary-text" style="margin-bottom: 0.8rem;">{{ result.message }}</p>
+                    {% if result.jobs %}
+                    <table class="case-table">
+                        <tbody>
+                            {% for job in result.jobs %}
+                            <tr>
+                                <th>{{ job.title }}</th>
+                                <td>
+                                    {{ job.company }} · {{ job.location }} · {{ job.employment_type }}
+                                    {% if job.posted_days_ago == 0 %}· Today{% else %}· {{ job.posted_days_ago }} days ago{% endif %}
+                                    {% if job.description %}
+                                    <p class="job-description">{{ job.description }}</p>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="summary-text">No roles in this location for the selected date window.</p>
+                    {% endif %}
+                </section>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <script id="cityData" type="application/json">{{ cities | tojson }}</script>
+    <script src="{{ url_for('static', filename='js/jobs.js') }}"></script>
+</body>
+</html>

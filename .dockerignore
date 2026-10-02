@@ -1,0 +1,15 @@
+venv
+.git
+.github
+__pycache__
+**/__pycache__
+*.py[cod]
+.env
+uploads
+logs
+.vscode
+.idea
+Resume Analyzer and Job Recommendation System
+research-Paper-AI-Assistant-main
+docs
+*.md

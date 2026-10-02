@@ -1,0 +1,25 @@
+<nav class="navbar app-nav" id="navbar">
+    <a href="/" class="nav-brand">
+        <div class="brand-icon">🧠</div>
+        <span>ResumeAI</span>
+    </a>
+    <ul class="nav-links">
+        {% if not current_user or current_user.role == 'candidate' %}
+        <li><a href="/" class="{{ 'active' if nav_active == 'hub' else '' }}">Hub</a></li>
+        <li><a href="/resume" class="{{ 'active' if nav_active == 'home' else '' }}">Home</a></li>
+        <li><a href="/dashboard" class="{{ 'active' if nav_active == 'dashboard' else '' }}">Dashboard</a></li>
+        <li><a href="{{ url_for('job_discovery') }}" class="{{ 'active' if nav_active == 'jobs' else '' }}">Jobs</a></li>
+        <li><a href="/practice" class="{{ 'active' if nav_active == 'practice' else '' }}">Practice</a></li>
+        {% endif %}
+        {% if current_user %}
+        <li><a href="/review" class="{{ 'active' if nav_active == 'review' else '' }}">Review</a></li>
+        <li><a href="{{ url_for('observability_page') }}" class="{{ 'active' if nav_active == 'observability' else '' }}">Observability</a></li>
+        <li><a href="{{ url_for('review_scenarios_page') }}" class="{{ 'active' if nav_active == 'evaluation' else '' }}">Evaluation</a></li>
+        {% endif %}
+    </ul>
+    {% if current_user %}
+    <a class="nav-signout" href="{{ url_for('logout') }}">Sign out</a>
+    {% else %}
+    <a class="nav-signout" href="{{ url_for('login') }}">Sign in</a>
+    {% endif %}
+</nav>

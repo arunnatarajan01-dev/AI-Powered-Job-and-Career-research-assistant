@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ role_copy.label }} review | AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
+</head>
+<body class="review-body">
+    <div class="bg-animated"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    {% set nav_active = 'review' %}
+    {% include '_nav.html' %}
+
+    <div class="review-page">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>{{ screen.title }}</h1>
+                <p class="summary-text">
+                    {% if case.source == 'sample' %}
+                    Sample screen for {{ case.candidate_name }}. Upload a resume from Home to review that analysis instead.
+                    {% else %}
+                    Reviewing the resume analyzed in this browser session.
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if notice %}
+            <div class="banner err">{{ notice }}</div>
+            {% endif %}
+            {% if role != 'candidate' %}
+            <div class="review-tabs">
+                <a href="{{ url_for('review_role', role=role, action='approve') }}" class="{{ 'active' if action == 'approve' else '' }}">Approve</a>
+                <a href="{{ url_for('review_role', role=role, action='reject') }}" class="{{ 'active' if action == 'reject' else '' }}">Reject</a>
+                <a href="{{ url_for('review_role', role=role, action='edit') }}" class="{{ 'active' if action == 'edit' else '' }}">Edit</a>
+            </div>
+            {% endif %}
+
+            <div class="review-layout">
+                <section class="review-panel">
+                    <div class="review-kicker">Case header</div>
+                    <h2 style="font-size: 1.15rem;">{{ case.filename }}</h2>
+                    <div class="review-stats">
+                        <div class="review-stat warn">
+                            <strong>{{ case.ats_percentage }}</strong>
+                            <span>ATS score</span>
+                        </div>
+                        <div class="review-stat">
+                            <strong>{{ case.skill_match }}%</strong>
+                            <span>Skill match</span>
+                        </div>
+                        <div class="review-stat">
+                            <strong style="font-size: 1.05rem;">{{ state.status }}</strong>
+                            <span>Decision</span>
+                        </div>
+                    </div>
+                    <table class="case-table">
+                        <tbody>
+                            <tr><th>Analysis id</th><td>{{ case.analysis_id }}</td></tr>
+                            <tr><th>Candidate</th><td>{{ case.candidate_name }}</td></tr>
+                            <tr><th>Email</th><td>{{ case.email }}</td></tr>
+                            <tr><th>ATS</th><td>{{ case.ats_score }}</td></tr>
+                            <tr><th>Top match</th><td>{{ case.top_title }} · {{ case.fit }} · {{ case.skill_match }}% skill match</td></tr>
+                            <tr><th>Skills</th><td>{{ case.skills }}</td></tr>
+                            <tr><th>Experience</th><td>{{ case.experience_years }} years</td></tr>
+                            <tr><th>Decision</th><td>{{ state.status }}</td></tr>
+                            <tr><th>Audit</th><td>{{ state.audit_status }}</td></tr>
+                            <tr><th>Share</th><td>{{ state.share or 'Not granted' }}</td></tr>
+                            <tr><th>Candidate notice</th><td>{{ state.candidate_notice or 'Not recorded' }}</td></tr>
+                            <tr><th>AI result</th><td>{{ case.ai_time }}</td></tr>
+                            <tr><th>Signed in as</th><td>{{ actor }} · {{ role_copy.label }}</td></tr>
+                            {% if role != 'candidate' %}
+                            <tr><th>Requisition</th><td>{{ case.requisition }}</td></tr>
+                            <tr><th>Decision id</th><td>{{ state.decision_id }}</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    <div class="constraint">{{ screen.constraint }}</div>
+                    {% if state.history %}
+                    <div class="history">
+                        <h3>Recent actions</h3>
+                        <table class="case-table">
+                            <tbody>
+                                {% for item in state.history %}
+                                <tr>
+                                    <th>{{ item.role }} · {{ item.action }}</th>
+                                    <td>{{ item.summary }}<br><span style="color: var(--text-muted);">{{ item.at }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </section>
+
+                {% if role != 'candidate' %}
+                <section class="review-panel">
+                    <div class="review-kicker">{{ role_copy.label }} · {{ action }}</div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">{{ actor }}</p>
+
+                    {% if errors %}
+                    <div class="banner err">
+                        The action was not recorded.
+                        <ul>
+                            {% for error in errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% if receipt %}
+                    <div class="banner ok">Recorded on this case.</div>
+                    <table class="case-table" style="margin-bottom: 1rem;">
+                        <tbody>
+                            {% for row in receipt %}
+                            <tr><th>{{ row[0] }}</th><td>{{ row[1] }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+
+                    <form id="reviewForm" method="post" action="{{ url_for('review_role', role=role, action=action) }}"
+                          data-role="{{ role }}" data-action="{{ action }}"
+                          data-old-values='{{ old_values | tojson }}'>
+                        <input type="hidden" name="action" value="{{ action }}">
+
+                        {% if action == 'approve' and role == 'candidate' %}
+                        <div class="field">
+                            <label>Target role<span class="req-mark">*</span></label>
+                            <select name="target_role">
+                                <option value="">Select a role</option>
+                                {% for title in case.target_role_options %}
+                                <option value="{{ title }}" {% if form.target_role == title %}selected{% endif %}>{{ title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label class="check-row">
+                            <input type="checkbox" name="confirm" {% if form.confirm == 'on' %}checked{% endif %}>
+                            <span>This extracted profile is accurate.<span class="req-mark">*</span></span>
+                        </label>
+                        <label class="check-row">
+                            <input type="checkbox" name="share_notice" {% if form.share_notice == 'on' %}checked{% endif %}>
+                            <span>A hiring manager may see this profile.<span class="req-mark">*</span></span>
+                        </label>
+                        <div class="field">
+                            <label>Note</label>
+                            <textarea name="note" placeholder="Optional context for the reviewer">{{ form.note or '' }}</textarea>
+                        </div>
+                        {% endif %}
+
+                        {% if action == 'approve' and role == 'hiring_manager' %}
+                        <div class="field">
+                            <label>Requisition<span class="req-mark">*</span></label>
+                            <div class="locked-value">{{ case.requisition }}</div>
+                        </div>
+                        <label class="check-row">
+                            <input type="checkbox" name="confirm" {% if form.confirm == 'on' %}checked{% endif %}>
+                            <span>I reviewed the resume, not only the score.<span class="req-mark">*</span></span>
+                        </label>
+                        <div class="field">
+                            <label>Next stage<span class="req-mark">*</span></label>
+                            <select name="stage">
+                                <option value="">Select a stage</option>
+                                {% for key, label in stage_options %}
+                                <option value="{{ key }}" {% if form.stage == key %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Decision note<span class="req-mark">*</span></label>
+                            <textarea name="note" placeholder="Why this person advances">{{ form.note or '' }}</textarea>
+                        </div>
+                        {% endif %}
+
+                        {% if action == 'approve' and role == 'auditor' %}
+                        <div class="field">
+                            <label>Decision id<span class="req-mark">*</span></label>
+                            <div class="locked-value">{{ state.decision_id }}</div>
+                        </div>
+                        <label class="check-row">
+                            <input type="checkbox" name="confirm" {% if form.confirm == 'on' %}checked{% endif %}>
+                            <span>Reviewer, reason, and original score are all present.<span class="req-mark">*</span></span>
+                        </label>
+                        <div class="field">
+                            <label>What was checked<span class="req-mark">*</span></label>
+                            <textarea name="note" placeholder="Checklist notes for the sign-off">{{ form.note or '' }}</textarea>
+                        </div>
+                        <div class="field">
+                            <label>Candidate notice<span class="req-mark">*</span></label>
+                            <select name="notice">
+                                <option value="">Notice status</option>
+                                {% for key, label in notice_options %}
+                                <option value="{{ key }}" {% if form.notice == key %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        {% if action == 'reject' %}
+                        {% if role != 'candidate' %}
+                        <div class="field">
+                            <label>{% if role == 'auditor' %}Decision id{% else %}Requisition{% endif %}<span class="req-mark">*</span></label>
+                            <div class="locked-value">{% if role == 'auditor' %}{{ state.decision_id }}{% else %}{{ case.requisition }}{% endif %}</div>
+                        </div>
+                        {% endif %}
+                        <div class="field">
+                            <label>Reason code<span class="req-mark">*</span></label>
+                            <select name="reason_code">
+                                <option value="">Select a reason</option>
+                                {% for key, label in reason_options %}
+                                <option value="{{ key }}" {% if form.reason_code == key %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Written note<span class="req-mark">*</span></label>
+                            <textarea name="note" placeholder="Explain the decision in a sentence the record can keep">{{ form.note or '' }}</textarea>
+                        </div>
+                        <div class="field">
+                            <label>What happens next<span class="req-mark">*</span></label>
+                            <select name="next_step">
+                                <option value="">Select the next step</option>
+                                {% for key, label in next_options %}
+                                <option value="{{ key }}" {% if form.next_step == key %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% if role != 'candidate' %}
+                        <div class="field">
+                            <label>Candidate notice<span class="req-mark">*</span></label>
+                            <select name="notice">
+                                <option value="">Tell the candidate?</option>
+                                {% for key, label in notice_options %}
+                                <option value="{{ key }}" {% if form.notice == key %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <label class="check-row">
+                            <input type="checkbox" name="confirm" {% if form.confirm == 'on' %}checked{% endif %}>
+                            <span>
+                                {% if role == 'candidate' %}Do not use this profile as screened.
+                                {% elif role == 'hiring_manager' %}This rejection is my decision.
+                                {% else %}This record is not compliant.{% endif %}
+                                <span class="req-mark">*</span>
+                            </span>
+                        </label>
+                        {% endif %}
+
+                        {% if action == 'edit' %}
+                        <div class="field">
+                            <label>{% if role == 'auditor' %}Field to annotate{% else %}Field to correct{% endif %}<span class="req-mark">*</span></label>
+                            <select name="field">
+                                <option value="">Select a field</option>
+                                {% for key, label in field_options %}
+                                <option value="{{ key }}" {% if form.field == key %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Old value<span class="req-mark">*</span></label>
+                            <div class="locked-value" id="oldValue">Select a field to show the current value</div>
+                        </div>
+                        <div class="field">
+                            <label>{% if role == 'auditor' %}Annotation{% else %}New value{% endif %}<span class="req-mark">*</span></label>
+                            <textarea name="new_value" placeholder="{% if role == 'auditor' %}What should the record say about this field?{% else %}Corrected value{% endif %}">{{ form.new_value or '' }}</textarea>
+                        </div>
+                        {% if role == 'auditor' %}
+                        <div class="field">
+                            <label>Annotation type<span class="req-mark">*</span></label>
+                            <select name="reason_code">
+                                <option value="">Select a type</option>
+                                {% for key, label in reason_options %}
+                                <option value="{{ key }}" {% if form.reason_code == key %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <div class="field">
+                            <label>Reason<span class="req-mark">*</span></label>
+                            <textarea name="note" placeholder="{% if role == 'candidate' %}Why the extraction is wrong{% elif role == 'hiring_manager' %}Why this parsed value is being overridden{% else %}Why this note belongs on the record{% endif %}">{{ form.note or '' }}</textarea>
+                        </div>
+                        {% endif %}
+
+                        <div class="review-actions">
+                            <button type="submit" id="reviewSubmit">{{ screen.submit }}</button>
+                            <span class="missing-note" id="missingNote"></span>
+                        </div>
+                    </form>
+                </section>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/review.js') }}"></script>
+</body>
+</html>

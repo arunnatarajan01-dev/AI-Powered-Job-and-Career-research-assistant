@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Overview</title>
+    <style>
+        :root {
+            --ink: #14324a;
+            --muted: #4d6578;
+            --line: #7d93a6;
+            --paper: #f4f7fb;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Calibri, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(900px 420px at 10% -10%, #d7f3ea, transparent 60%),
+                radial-gradient(800px 420px at 100% 0%, #d9e8ff, transparent 55%),
+                var(--paper);
+        }
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 36px 28px 48px;
+        }
+        h1 {
+            margin: 0 0 6px;
+            font-size: 32px;
+            letter-spacing: -0.03em;
+        }
+        .lede {
+            margin: 0 0 28px;
+            color: var(--muted);
+            font-size: 16px;
+        }
+        .stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+        .box {
+            width: min(760px, 100%);
+            border-radius: 18px;
+            padding: 16px 22px;
+            text-align: center;
+            box-shadow: 0 10px 28px rgba(20, 50, 74, 0.08);
+        }
+        .box strong { display: block; font-size: 18px; margin-bottom: 4px; }
+        .box span { display: block; font-size: 14px; line-height: 1.45; }
+        .browser { background: #1f6f8b; color: #f3fbff; }
+        .flask { background: #2457c5; color: #f4f7ff; }
+        .arrow {
+            width: 2px;
+            height: 28px;
+            background: var(--line);
+            position: relative;
+        }
+        .arrow::after {
+            content: "";
+            position: absolute;
+            left: -5px;
+            bottom: -1px;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid var(--line);
+        }
+        .band {
+            width: min(980px, 100%);
+            background: #12324a;
+            color: #eef6fb;
+            border-radius: 22px;
+            padding: 18px 18px 16px;
+        }
+        .band h2 {
+            margin: 0 0 12px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 650;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #9ad7c4;
+        }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+        .step {
+            background: #1d4d6e;
+            border-radius: 12px;
+            padding: 10px 8px;
+            text-align: center;
+            font-size: 13px;
+            line-height: 1.3;
+        }
+        .step b {
+            display: block;
+            color: #b7f3df;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+        .handlers {
+            width: min(980px, 100%);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .card {
+            border-radius: 16px;
+            padding: 14px 12px 16px;
+            min-height: 148px;
+            box-shadow: 0 10px 24px rgba(20, 50, 74, 0.08);
+        }
+        .card strong { display: block; margin-bottom: 6px; font-size: 16px; }
+        .card p { margin: 0; font-size: 13px; line-height: 1.4; }
+        .career { background: #e7f6ee; color: #145c3a; }
+        .jobs { background: #e7f1ff; color: #1d4f91; }
+        .research { background: #f3eaff; color: #5b2d86; }
+        .review { background: #fff1df; color: #8a4b12; }
+        .logs {
+            width: min(760px, 100%);
+            background: #0f766e;
+            color: #f3fffc;
+        }
+        @media (max-width: 800px) {
+            .steps, .handlers { grid-template-columns: 1fr 1fr; }
+            h1 { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Architecture Overview</h1>
+        <p class="lede">One Flask application. Every agent action passes through the same middleware, then one handler.</p>
+        <div class="stack">
+            <div class="box browser">
+                <strong>Browser</strong>
+                <span>Hub, resume, jobs, research, review, and observability pages</span>
+            </div>
+            <div class="arrow"></div>
+            <div class="box flask">
+                <strong>Flask routes</strong>
+                <span>Sign-in and session role, then the page or API for that action</span>
+            </div>
+            <div class="arrow"></div>
+            <section class="band">
+                <h2>Middleware, same order every time</h2>
+                <div class="steps">
+                    <div class="step"><b>1</b>Bind the user</div>
+                    <div class="step"><b>2</b>Trim the text</div>
+                    <div class="step"><b>3</b>Input guardrail</div>
+                    <div class="step"><b>4</b>Open a trace</div>
+                    <div class="step"><b>5</b>Run the handler</div>
+                    <div class="step"><b>6</b>Output guardrail</div>
+                </div>
+            </section>
+            <div class="arrow"></div>
+            <div class="handlers">
+                <article class="card career">
+                    <strong>Resume</strong>
+                    <p>Parse PDF or DOCX, score ATS, match roles, list skill gaps, roadmap, and practice.</p>
+                </article>
+                <article class="card jobs">
+                    <strong>Jobs</strong>
+                    <p>LinkedIn and Naukri by city and posting date. Live Apify, or the local catalog.</p>
+                </article>
+                <article class="card research">
+                    <strong>Research</strong>
+                    <p>Gemini answers from the uploaded paper, or returns an IEEE draft from a repository link.</p>
+                </article>
+                <article class="card review">
+                    <strong>Review</strong>
+                    <p>Candidate, hiring manager, or auditor approves, rejects, or corrects the result.</p>
+                </article>
+            </div>
+            <div class="arrow"></div>
+            <div class="box logs">
+                <strong>Oversight</strong>
+                <span>Safety alert log, trace log, and the local evaluation suite on the Observability page</span>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

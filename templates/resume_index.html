@@ -19,18 +19,8 @@
     <div class="particles" id="particles"></div>
 
     <!-- Navigation -->
-    <nav class="navbar" id="navbar">
-        <a href="/" class="nav-brand">
-            <div class="brand-icon">🧠</div>
-            <span>ResumeAI</span>
-        </a>
-        <ul class="nav-links">
-            <li><a href="/">Hub</a></li>
-            <li><a href="/resume" class="active">Home</a></li>
-            <li><a href="/practice">Practice</a></li>
-            <li><a href="#features">Features</a></li>
-        </ul>
-    </nav>
+    {% set nav_active = 'home' %}
+    {% include '_nav.html' %}
 
     <!-- Hero Section -->
     <section class="hero">

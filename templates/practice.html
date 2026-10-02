@@ -8,25 +8,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
 </head>
-<body>
+<body class="practice-body">
     <!-- Animated Background -->
     <div class="bg-animated"></div>
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
 
     <!-- Navigation -->
-    <nav class="navbar" id="navbar">
-        <a href="/" class="nav-brand">
-            <div class="brand-icon">🧠</div>
-            <span>ResumeAI</span>
-        </a>
-        <ul class="nav-links">
-            <li><a href="/">Hub</a></li>
-            <li><a href="/resume">Home</a></li>
-            <li><a href="/dashboard">Dashboard</a></li>
-            <li><a href="/practice" class="active">Practice</a></li>
-        </ul>
-    </nav>
+    {% set nav_active = 'practice' %}
+    {% include '_nav.html' %}
 
     <div class="practice-page">
         <div class="practice-container">

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in | AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
+</head>
+<body>
+    <div class="bg-animated"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="review-page login-page">
+        <div class="dashboard-container login-wrap">
+            <div class="dashboard-header">
+                <h1>Sign in <span class="text-gradient">to the career assistant</span></h1>
+                <p class="summary-text">A candidate opens multi-platform job discovery. A hiring manager or auditor opens their review screen.</p>
+            </div>
+
+            {% if error %}
+            <div class="banner err">{{ error }}</div>
+            {% endif %}
+
+            <form class="login-form" method="post" action="{{ url_for('login') }}">
+                <input type="hidden" name="next" value="{{ next_url }}">
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" autocomplete="username" required placeholder="name@email.com">
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required>
+                </div>
+                <button type="submit">Sign in</button>
+            </form>
+
+            <h2 style="font-size: 1.15rem; margin-bottom: 0.75rem;">Demo accounts</h2>
+            <div class="role-grid">
+                {% for user in users %}
+                <form class="demo-card" method="post" action="{{ url_for('login') }}">
+                    <input type="hidden" name="next" value="{{ next_url }}">
+                    <input type="hidden" name="email" value="{{ user.email }}">
+                    <input type="hidden" name="password" value="{{ user.password }}">
+                    <h2>{{ user.label }}</h2>
+                    <p>{{ user.name }}</p>
+                    <p>{{ user.email }}</p>
+                    <p>Password {{ user.password }}</p>
+                    <button type="submit">Sign in as {{ user.name }}</button>
+                </form>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

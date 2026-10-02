@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review roles | AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
+</head>
+<body>
+    <div class="bg-animated"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    {% set nav_active = 'review' %}
+    {% include '_nav.html' %}
+
+    <div class="review-page">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>Human review <span class="text-gradient">by role</span></h1>
+                <p class="summary-text">Each role sees the same resume screen and a different approve, reject, and edit form. Open a role to record a decision.</p>
+            </div>
+            <div class="role-grid">
+                {% for key, meta in roles.items() %}
+                <a class="role-card" href="{{ url_for('review_role', role=key, action='approve') }}">
+                    <h2>{{ meta.label }}</h2>
+                    <p>{{ meta.summary }}</p>
+                    <span class="enter">Open {{ meta.label }} screen</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

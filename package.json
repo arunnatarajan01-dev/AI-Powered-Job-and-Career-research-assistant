@@ -1,0 +1,10 @@
+{
+  "name": "ai-powered-job-and-career-research-assistant",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Flask application for job, career, and research assistance.",
+  "scripts": {
+    "build": "node -e \"console.log('No frontend build step is required; Flask serves the static assets directly.')\"",
+    "start": "python unified_app.py"
+  }
+}

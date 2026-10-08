@@ -75,6 +75,33 @@ def _get_job_embeddings():
     return _job_embeddings
 
 
+_INDIA_MARKERS = (
+    "bengaluru",
+    "bangalore",
+    "hyderabad",
+    "pune",
+    "mumbai",
+    "delhi",
+    "chennai",
+    "kolkata",
+    "ahmedabad",
+    "jaipur",
+    "noida",
+    "gurugram",
+    "gurgaon",
+    "kochi",
+    "india",
+)
+
+
+def _location_preference(location):
+    """Indian cities rank ahead of other locations."""
+    text = (location or "").lower()
+    if any(marker in text for marker in _INDIA_MARKERS):
+        return 0
+    return 1
+
+
 def _keyword_match_score(resume_skills, job_skills_str):
     """Fallback keyword-based matching when BERT is unavailable."""
     resume_skills_lower = {s.lower() for s in resume_skills}
@@ -149,7 +176,7 @@ def match_jobs(resume_text, resume_skills, top_k=10):
                     'match_score': round(combined_score * 100, 1),
                 })
             
-            results.sort(key=lambda x: x['match_score'], reverse=True)
+            results.sort(key=lambda x: (_location_preference(x["location"]), -x["match_score"]))
             return results[:top_k]
     
     # Fallback: keyword-only matching
@@ -178,5 +205,5 @@ def match_jobs(resume_text, resume_skills, top_k=10):
             'match_score': round(keyword_score * 100, 1),
         })
     
-    results.sort(key=lambda x: x['match_score'], reverse=True)
+    results.sort(key=lambda x: (_location_preference(x["location"]), -x["match_score"]))
     return results[:top_k]

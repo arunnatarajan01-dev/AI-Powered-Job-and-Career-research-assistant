@@ -22,18 +22,36 @@
                 <p class="summary-text summary-clamp">Signed in as {{ user.name }}. Search LinkedIn and Naukri by location for today, last week, or last month.</p>
             </div>
 
-            <form class="review-panel" method="get" action="{{ url_for('job_discovery') }}">
+            <form id="jobSearch" class="review-panel" method="get" action="{{ url_for('job_discovery') }}">
                 <div class="field">
                     <label for="keyword">Role</label>
                     <input id="keyword" name="keyword" type="text" value="{{ keyword or 'software engineer' }}" placeholder="software engineer">
                 </div>
-                <div class="field">
-                    <label for="location">Current location</label>
-                    <input id="location" name="location" type="text" value="{{ location }}" placeholder="Bengaluru" required>
-                </div>
-                <div class="review-actions" style="margin-bottom: 0.9rem;">
-                    <button type="button" id="useLocation" class="secondary-action">Use current location</button>
-                    <span class="missing-note" id="locationStatus"></span>
+                <div class="filter-line">
+                    <select id="experience" name="experience" aria-label="Select Exp">
+                        <option value="" {% if not experience %}selected{% endif %}>Select Exp</option>
+                        {% for year in experience_years %}
+                        <option value="{{ year }}" {% if experience == year %}selected{% endif %}>{{ year }} yrs</option>
+                        {% endfor %}
+                    </select>
+                    <select id="workMode" name="work_mode" aria-label="Work mode">
+                        <option value="" {% if not work_mode %}selected{% endif %}>Work mode</option>
+                        <option value="remote" {% if work_mode == 'remote' %}selected{% endif %}>Remote</option>
+                        <option value="hybrid" {% if work_mode == 'hybrid' %}selected{% endif %}>Hybrid</option>
+                        <option value="onsite" {% if work_mode == 'onsite' %}selected{% endif %}>Onsite</option>
+                    </select>
+                    <label class="location-field" for="location">
+                        <svg class="location-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 21s6.5-5.2 6.5-10.2A6.5 6.5 0 0 0 5.5 10.8C5.5 15.8 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2"></path>
+                            <circle cx="12" cy="10.5" r="2.2" fill="none" stroke="currentColor" stroke-width="2"></circle>
+                        </svg>
+                        <span class="visually-hidden">Location</span>
+                        <input id="location" name="location" type="text" value="{{ location or 'All location' }}" placeholder="All location">
+                    </label>
+                    <label class="check-row remote-option" for="remoteOnly">
+                        <input id="remoteOnly" type="checkbox" name="remote" value="1" {% if remote_only %}checked{% endif %}>
+                        <span>Remote job opportunities only</span>
+                    </label>
                 </div>
                 <div class="review-kicker">Posted</div>
                 <div class="check-row">
@@ -46,58 +64,110 @@
                 </div>
                 <div class="review-kicker">Providers</div>
                 <label class="check-row">
-                    <input type="checkbox" name="provider" value="linkedin" {% if 'linkedin' in selected %}checked{% endif %}>
-                    <span>LinkedIn</span>
-                </label>
-                <label class="check-row">
                     <input type="checkbox" name="provider" value="naukri" {% if 'naukri' in selected %}checked{% endif %}>
                     <span>Naukri</span>
+                </label>
+                <label class="check-row">
+                    <input type="checkbox" name="provider" value="linkedin" {% if 'linkedin' in selected %}checked{% endif %}>
+                    <span>LinkedIn</span>
                 </label>
                 {% if error %}
                 <div class="banner err">{{ error }}</div>
                 {% endif %}
-                <div class="review-actions">
-                    <button type="submit">Search jobs</button>
+                {% if resume_error %}
+                <div class="banner err">{{ resume_error }}</div>
+                {% endif %}
+                {% if resume_notice %}
+                <div class="banner ok">{{ resume_notice }}</div>
+                {% endif %}
+                <div class="review-actions job-action-row">
+                    <button type="submit" class="job-action">
+                        <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle>
+                            <path d="M16 16.5L20.5 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                        </svg>
+                        Search jobs
+                    </button>
+                    <label class="job-action" for="resumeFile">
+                        <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 16V5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                            <path d="M8 8.5L12 4.5L16 8.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                        </svg>
+                        Upload new Resume
+                    </label>
                 </div>
+                {% if not searched %}
+                <p class="missing-note" id="resumeStatus">
+                    {% if resume_name %}
+                    Scoring uses skills from {{ resume_name }}{% if resume_skill_count %} ({{ resume_skill_count }} skills){% endif %}.
+                    {% else %}
+                    Upload a resume to score each job against your skills.
+                    {% endif %}
+                </p>
+                {% endif %}
+            </form>
+            <form id="resumeUpload" method="post" enctype="multipart/form-data" action="{{ url_for('job_resume_upload') }}">
+                <input type="hidden" name="next" value="{{ request.full_path }}">
+                <input id="resumeFile" name="resume" type="file" accept=".pdf,.docx,.doc" class="visually-hidden">
             </form>
 
             {% if searched %}
-            <div class="review-actions" style="margin-top: 1rem;">
-                <a class="nav-signout" href="{{ url_for('job_export', location=location, keyword=keyword, posted=posted, provider=selected) }}">Download Excel</a>
-            </div>
-            <div class="scenario-list" style="margin-top: 1.25rem;">
-                {% for result in results %}
-                <section class="review-panel">
-                    <div class="review-kicker">{{ result.label }} · {{ result.jobs|length }} · {{ result.mode|replace('_', ' ') }}</div>
-                    <h2 style="font-size: 1.15rem; margin-bottom: 0.4rem;">{{ result.label }}</h2>
-                    <p class="summary-text" style="margin-bottom: 0.8rem;">{{ result.message }}</p>
-                    {% if result.jobs %}
+            {% set job_total = namespace(n=0) %}
+            {% for result in results %}
+            {% set job_total.n = job_total.n + (result.jobs|length) %}
+            {% endfor %}
+            <div class="scenario-list" id="jobResults" style="margin-top: 1.25rem;">
+                <section class="review-panel job-board">
+                    <h2 class="recommended-jobs">Recommended jobs ({{ job_total.n }})</h2>
+                    {% if job_total.n %}
                     <table class="case-table">
                         <tbody>
+                            {% for result in results %}
                             {% for job in result.jobs %}
-                            <tr>
-                                <th>{{ job.title }}</th>
+                            <tr class="job-result">
+                                <th>
+                                    {{ job.title }}
+                                    {% if job.skill_match_percent is not none %}
+                                    <div class="skill-match">{{ job.skill_match_percent }}% matched</div>
+                                    {% endif %}
+                                </th>
                                 <td>
                                     {{ job.company }} · {{ job.location }} · {{ job.employment_type }}
+                                    {% if job.remote %}<span class="remote-tag">remote</span>{% endif %}
                                     {% if job.posted_days_ago == 0 %}· Today{% else %}· {{ job.posted_days_ago }} days ago{% endif %}
                                     {% if job.description %}
-                                    <p class="job-description">{{ job.description }}</p>
+                                    <div class="job-description-wrap">
+                                        <p class="job-description is-clamped">{{ job.description }}</p>
+                                        <button type="button" class="job-more" hidden>more</button>
+                                    </div>
                                     {% endif %}
+                                    <div class="job-apply">
+                                        {% if job.career_url %}
+                                        <a class="apply-direct" href="{{ job.career_url }}" target="_blank" rel="noopener noreferrer">Apply directly</a>
+                                        {% else %}
+                                        <button type="button" class="apply-direct is-unavailable" data-company="{{ job.company }}">Apply directly</button>
+                                        {% endif %}
+                                    </div>
                                 </td>
                             </tr>
+                            {% endfor %}
                             {% endfor %}
                         </tbody>
                     </table>
                     {% else %}
-                    <p class="summary-text">No roles in this location for the selected date window.</p>
+                    <p class="summary-text">No roles match this location, date, experience, or remote choice.</p>
                     {% endif %}
                 </section>
-                {% endfor %}
             </div>
+            <nav class="job-pager" id="jobPager" aria-label="Job result pages" hidden></nav>
             {% endif %}
         </div>
     </div>
-    <script id="cityData" type="application/json">{{ cities | tojson }}</script>
+    <div class="loading-overlay job-search-loading" id="jobSearchLoading" role="status" aria-live="polite" aria-busy="false">
+        <p class="loading-text">Loading…</p>
+        <div class="job-loading-list" id="jobSearchLoadingList"></div>
+    </div>
     <script src="{{ url_for('static', filename='js/jobs.js') }}"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in | AI Resume Analyzer</title>
+    <title>Login | AI Resume Analyzer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
 </head>
@@ -15,10 +15,13 @@
     <div class="review-page login-page">
         <div class="dashboard-container login-wrap">
             <div class="dashboard-header">
-                <h1>Sign in <span class="text-gradient">to the career assistant</span></h1>
-                <p class="summary-text">A candidate opens multi-platform job discovery. A hiring manager or auditor opens their review screen.</p>
+                <h1>Login <span class="text-gradient">to the career assistant</span></h1>
+                <p class="summary-text">A candidate opens multi-platform job discovery. A mentor opens their review screen.</p>
             </div>
 
+            {% if notice %}
+            <div class="banner ok">{{ notice }}</div>
+            {% endif %}
             {% if error %}
             <div class="banner err">{{ error }}</div>
             {% endif %}
@@ -33,8 +36,9 @@
                     <label for="password">Password</label>
                     <input id="password" name="password" type="password" autocomplete="current-password" required>
                 </div>
-                <button type="submit">Sign in</button>
+                <button type="submit">Login</button>
             </form>
+            <p class="auth-switch">Need an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
 
             <h2 style="font-size: 1.15rem; margin-bottom: 0.75rem;">Demo accounts</h2>
             <div class="role-grid">
@@ -47,7 +51,7 @@
                     <p>{{ user.name }}</p>
                     <p>{{ user.email }}</p>
                     <p>Password {{ user.password }}</p>
-                    <button type="submit">Sign in as {{ user.name }}</button>
+                    <button type="submit">Login as {{ user.name }}</button>
                 </form>
                 {% endfor %}
             </div>

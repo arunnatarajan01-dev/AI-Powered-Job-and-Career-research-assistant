@@ -81,3 +81,50 @@ def extract_links(text):
     pattern = r'https?://[^\s<>"{}|\\^`\[\]]+'
     links = re.findall(pattern, text)
     return links
+
+
+_HEADER_SKIP = re.compile(r"^(resume|curriculum vitae|cv)$", re.IGNORECASE)
+_ROLE_LINE = re.compile(
+    r"\b(engineer|developer|manager|analyst|designer|consultant|intern|summary|objective|profile|skills|experience|education)\b",
+    re.IGNORECASE,
+)
+
+
+def extract_candidate_name(text):
+    """Read the candidate name from the top of a resume.
+
+    The name is usually the first line of a resume PDF. Lines that are only
+    a document title or a job title are skipped.
+    """
+    checked = 0
+    for raw in (text or "").splitlines():
+        line = " ".join(raw.split()).strip()
+        if not line or _HEADER_SKIP.match(line.strip(":- ")):
+            continue
+        checked += 1
+        name = _name_on_line(line)
+        if name and not _ROLE_LINE.search(name):
+            return name
+        if checked >= 4:
+            break
+    return ""
+
+
+def _name_on_line(line):
+    """Keep the name when contact details share the first resume line."""
+    head = re.split(r"\s+[|•]\s+|\s{2,}", line, maxsplit=1)[0]
+    head = re.split(
+        r"\s+(?=https?://|www\.|[A-Za-z0-9._%+-]+@)",
+        head,
+        maxsplit=1,
+    )[0].strip(" |,-")
+    if not head or "@" in head or "http" in head.lower() or re.search(r"\d{5,}", head):
+        return ""
+    if len(head) > 80:
+        return ""
+    words = head.split()
+    if not words or len(words) > 5:
+        return ""
+    if sum(ch.isalpha() for ch in head) < 2:
+        return ""
+    return head

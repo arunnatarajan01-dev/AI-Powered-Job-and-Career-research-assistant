@@ -60,7 +60,7 @@
                     <table class="case-table">
                         <tbody>
                             <tr><th>Analysis id</th><td>{{ case.analysis_id }}</td></tr>
-                            <tr><th>Candidate</th><td>{{ case.candidate_name }}</td></tr>
+                            <tr><th>Candidate name</th><td>{{ case.candidate_name }}</td></tr>
                             <tr><th>Email</th><td>{{ case.email }}</td></tr>
                             <tr><th>ATS</th><td>{{ case.ats_score }}</td></tr>
                             <tr><th>Top match</th><td>{{ case.top_title }} · {{ case.fit }} · {{ case.skill_match }}% skill match</td></tr>
@@ -78,6 +78,11 @@
                             {% endif %}
                         </tbody>
                     </table>
+                    {% if ats_pdf_ready %}
+                    <div class="review-actions">
+                        <a class="ats-pdf-button" href="{{ url_for('review_ats_pdf') }}">Download ATS PDF</a>
+                    </div>
+                    {% endif %}
                     <div class="constraint">{{ screen.constraint }}</div>
                     {% if state.history %}
                     <div class="history">

@@ -28,9 +28,27 @@ LOCATION_ALIASES = {
 CATALOG_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "job_feeds"
 
 
+def is_all_locations(query):
+    """True for the default filter that keeps every Indian location."""
+    return (query or "").strip().lower() in {"all location", "all locations", "india"}
+
+
+def provider_location(query):
+    """Location string sent to a job source. Blank and All location search India."""
+    text = (query or "").strip()
+    if not text or is_all_locations(text):
+        return "India"
+    if "india" not in text.lower():
+        return f"{text}, India"
+    return text
+
+
 def location_matches(job_location, query):
     """True when the job city matches the searched location, including common aliases."""
+    if is_all_locations(query):
+        return True
     needle = (query or "").strip().lower()
+    needle = re.sub(r",?\s*\bindia\b\s*$", "", needle).strip()
     haystack = (job_location or "").strip().lower()
     if not needle or not haystack:
         return False
@@ -102,12 +120,35 @@ def _location_text(item):
     return ""
 
 
+_SECTION_LABELS = (
+    "Roles & Responsibilities",
+    "Roles and Responsibilities",
+    "Years of experience",
+    "Job match score",
+    "Work Experience",
+    "Job description",
+    "Job highlights",
+    "Early Applicant",
+    "Employment Type",
+    "Industry Type",
+    "Role Category",
+    "Key Skills",
+    "Keyskills",
+    "Department",
+    "Education",
+    "Location",
+    "*NOTE*",
+    "UG:",
+    "PG:",
+    "Role:",
+)
+
+
 def _plain_text(value):
     """Turn a description into readable text, including HTML from a provider."""
     text = str(value or "")
     text = re.sub(r"(?i)<\s*br\s*/?>", "\n", text)
-    text = re.sub(r"(?i)</\s*p\s*>", "\n", text)
-    text = re.sub(r"(?i)</\s*li\s*>", "\n", text)
+    text = re.sub(r"(?i)</\s*(p|div|h[1-6]|li|tr)\s*>", "\n", text)
     text = re.sub(r"<[^>]+>", " ", text)
     text = (
         text.replace("&nbsp;", " ")
@@ -118,7 +159,253 @@ def _plain_text(value):
         .replace("&quot;", '"')
     )
     lines = [" ".join(line.split()) for line in text.splitlines()]
-    return "\n".join(line for line in lines if line)[:6000]
+    return "\n".join(line for line in lines if line)[:8000]
+
+
+_HEADINGS_WITH_BODY = (
+    "Job highlights",
+    "Job match score",
+    "Early Applicant",
+    "Keyskills",
+    "Key Skills",
+    "Work Experience",
+    "Job description",
+    "Education",
+)
+
+
+def format_job_description(value):
+    """Put posting sections and keywords on separate lines with space between them."""
+    text = _plain_text(value)
+    if not text:
+        return ""
+    text = re.sub(r",(?=\S)", ", ", text)
+    text = re.sub(r"\)\s+(?=[A-Z])", ")\n\n", text)
+    for label in _SECTION_LABELS:
+        pattern = re.compile(rf"(?<=\S)\s+({re.escape(label)})(?=$|[\s:\-])")
+        text = pattern.sub(r"\n\n\1", text)
+    for label in _HEADINGS_WITH_BODY:
+        pattern = re.compile(rf"({re.escape(label)})[ \t]+(?![-:])(\S)")
+        text = pattern.sub(r"\1\n\n\2", text)
+    text = re.sub(
+        r"(Roles\s*&\s*Responsibilities\s*-)\s+",
+        r"\1\n\n",
+        text,
+        flags=re.IGNORECASE,
+    )
+    marker = "Roles & Responsibilities"
+    split_at = text.find(marker)
+    if split_at >= 0:
+        head, tail = text[:split_at], text[split_at:]
+        tail = re.sub(
+            r",\s+(?=(?:UI Automation|API Testing|SoapUI|Cross-browser|Security|Performance)\b)",
+            "\n",
+            tail,
+        )
+        text = head + tail
+    text = re.sub(r"[ \t]+\n", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+def experience_bounds(item, description=""):
+    """Return the inclusive years a posting asks for, or None when it does not say."""
+    if isinstance(item, dict) and item.get("experience_min") not in (None, ""):
+        try:
+            low = int(item.get("experience_min"))
+            high = int(item.get("experience_max") or low)
+        except (TypeError, ValueError):
+            low = high = None
+        if low is not None:
+            return min(low, high), max(low, high)
+    text = description or ""
+    ranged = re.search(
+        r"(\d+)\s*(?:-|–|to)\s*(\d+)\s*\+?\s*(?:years|yrs)",
+        text,
+        re.IGNORECASE,
+    )
+    if ranged:
+        low, high = int(ranged.group(1)), int(ranged.group(2))
+        return min(low, high), max(low, high)
+    plus = re.search(r"(\d+)\+\s*(?:years|yrs)", text, re.IGNORECASE)
+    if plus:
+        return int(plus.group(1)), 25
+    single = re.search(r"(\d+)\s*(?:years|yrs)", text, re.IGNORECASE)
+    if single:
+        year = int(single.group(1))
+        return year, year
+    return None
+
+
+def experience_label(bounds):
+    if not bounds:
+        return ""
+    low, high = bounds
+    if low == high:
+        return f"{low} yrs"
+    return f"{low} - {high} yrs"
+
+
+def _workplace_blob(item, description=""):
+    if not isinstance(item, dict):
+        return str(description or "").lower()
+    return " ".join(
+        str(part or "")
+        for part in (
+            item.get("location"),
+            item.get("title"),
+            item.get("employment_type"),
+            item.get("employmentType"),
+            item.get("workplaceType"),
+            item.get("workType"),
+            item.get("workMode"),
+            description,
+        )
+    ).lower()
+
+
+def is_remote_job(item, description=""):
+    if isinstance(item, dict) and item.get("remote") in (True, "true", "yes", 1, "1"):
+        return True
+    blob = _workplace_blob(item, description)
+    return any(token in blob for token in ("remote", "work from home", "work-from-home", "wfh"))
+
+
+def is_hybrid_job(item, description=""):
+    if isinstance(item, dict) and str(item.get("workplaceType") or item.get("workMode") or "").lower() == "hybrid":
+        return True
+    return bool(re.search(r"\bhybrid\b", _workplace_blob(item, description)))
+
+
+def posting_text(description, location, years_label):
+    """Keep a structured posting as-is. Give short snippets the same section spacing."""
+    formatted = format_job_description(description)
+    if re.search(r"job highlights|job description", formatted, re.IGNORECASE):
+        return formatted
+    parts = ["Job highlights", formatted or "Details were not included in this posting."]
+    if years_label:
+        parts.extend(["", "Work Experience", years_label])
+    if location:
+        parts.extend(["", "Location", location])
+    parts.extend(["", "Job description", formatted or "Details were not included in this posting."])
+    return "\n".join(parts)
+
+
+_JOB_BOARDS = (
+    "linkedin.com",
+    "naukri.com",
+    "indeed.com",
+    "foundit.in",
+    "shine.com",
+    "glassdoor.",
+)
+
+# Career sites for companies in the local catalogs, plus common employers.
+COMPANY_CAREER_PAGES = {
+    "kaveri digital": "https://www.naukri.com/kaveri-digital-jobs",
+    "metrostack": "https://www.naukri.com/metrostack-jobs",
+    "deccan soft": "https://www.naukri.com/deccan-soft-jobs",
+    "westline": "https://www.naukri.com/westline-jobs",
+    "northwind analytics": "https://www.linkedin.com/jobs/search/?keywords=Northwind%20Analytics",
+    "harbor systems": "https://www.linkedin.com/jobs/search/?keywords=Harbor%20Systems",
+    "lattice works": "https://www.linkedin.com/jobs/search/?keywords=Lattice%20Works",
+    "bluepeak": "https://www.linkedin.com/jobs/search/?keywords=Bluepeak",
+    "indus cloud": "https://www.linkedin.com/jobs/search/?keywords=Indus%20Cloud",
+    "sable labs": "https://www.linkedin.com/jobs/search/?keywords=Sable%20Labs",
+    "google": "https://www.google.com/about/careers/applications/",
+    "meta": "https://www.metacareers.com/jobs",
+    "microsoft": "https://careers.microsoft.com/",
+    "amazon": "https://www.amazon.jobs/",
+    "netflix": "https://jobs.netflix.com/",
+    "adobe": "https://careers.adobe.com/",
+    "ibm": "https://www.ibm.com/careers",
+    "oracle": "https://careers.oracle.com/",
+    "uber": "https://www.uber.com/us/en/careers/",
+    "spotify": "https://www.lifeatspotify.com/jobs",
+    "salesforce": "https://careers.salesforce.com/en/jobs/",
+    "tesla": "https://www.tesla.com/careers",
+    "airbnb": "https://careers.airbnb.com/",
+}
+
+
+def _http_url(value):
+    text = str(value or "").strip()
+    if text.startswith("//"):
+        text = "https:" + text
+    if text.lower().startswith(("http://", "https://")):
+        return text
+    return ""
+
+
+def _is_job_board(url):
+    host = url.lower()
+    return any(token in host for token in _JOB_BOARDS)
+
+
+def _company_page(url):
+    """Keep a company career page. Skip a single job posting."""
+    url = _http_url(url)
+    if not url:
+        return ""
+    lower = url.lower()
+    if not _is_job_board(url):
+        base = url.rstrip("/")
+        if re.search(r"/(careers|jobs|career)(/|$)", lower):
+            return base
+        return base + "/careers"
+    if "jobs-careers" in lower or re.search(r"/careers(/|$)", lower):
+        return url.split("?")[0]
+    if "linkedin.com/company/" in lower:
+        base = url.split("?")[0].rstrip("/")
+        if not base.endswith("/jobs"):
+            return base + "/jobs"
+        return base
+    return ""
+
+
+def _known_career_page(company):
+    name = re.sub(r"\s+", " ", str(company or "").strip().lower())
+    if not name:
+        return ""
+    direct = COMPANY_CAREER_PAGES.get(name)
+    if direct:
+        return direct
+    for key, url in COMPANY_CAREER_PAGES.items():
+        if len(key) >= 4 and re.search(rf"\b{re.escape(key)}\b", name):
+            return url
+    return ""
+
+
+def career_page_url(item, company):
+    """Company career page when the posting or a known employer site has one."""
+    if not isinstance(item, dict):
+        item = {}
+    for key in (
+        "career_url",
+        "careerUrl",
+        "companyCareersUrl",
+        "careersUrl",
+        "companyUrl",
+        "company_url",
+        "companyWebsite",
+        "company_website",
+        "companyLinkedinUrl",
+        "website",
+    ):
+        page = _company_page(item.get(key))
+        if page:
+            return page
+    nested = item.get("company")
+    if isinstance(nested, dict):
+        for key in ("careerUrl", "companyUrl", "url", "website"):
+            page = _company_page(nested.get(key))
+            if page:
+                return page
+    for key in ("applyUrl", "externalApplyLink", "apply_url", "externalApplyUrl"):
+        url = _http_url(item.get(key))
+        if url and not _is_job_board(url):
+            return url
+    return _known_career_page(company)
 
 
 def _description_text(item):
@@ -131,7 +418,7 @@ def _description_text(item):
         or item.get("snippet")
         or ""
     )
-    return _plain_text(raw)
+    return format_job_description(raw)
 
 
 def _normalize(raw, provider_key):
@@ -143,12 +430,15 @@ def _normalize(raw, provider_key):
         if not title:
             continue
         company = item.get("company") or item.get("companyName") or "Unknown company"
+        location = _location_text(item).strip()
         description = _description_text(item)
+        bounds = experience_bounds(item, description)
+        years_label = experience_label(bounds)
         jobs.append({
             "id": str(item.get("id") or item.get("jobId") or title),
             "title": title,
             "company": str(company).strip(),
-            "location": _location_text(item).strip(),
+            "location": location,
             "posted_days_ago": _posted_days_ago(item),
             "employment_type": str(
                 item.get("employment_type")
@@ -156,10 +446,38 @@ def _normalize(raw, provider_key):
                 or item.get("contractType")
                 or "Full-time"
             ).strip(),
-            "description": description,
+            "description": posting_text(description, location, years_label),
+            "experience_min": bounds[0] if bounds else None,
+            "experience_max": bounds[1] if bounds else None,
+            "experience_label": years_label,
+            "remote": is_remote_job(item, description),
+            "hybrid": is_hybrid_job(item, description),
             "provider": provider_key,
+            "career_url": career_page_url(item, company),
         })
     return jobs
+
+
+def apply_search_filters(jobs, experience=None, remote_only=False, work_mode=None):
+    """Keep jobs that fit the selected years, work mode, and remote-only choice."""
+    mode = (work_mode or "").strip().lower()
+    selected = []
+    for job in jobs:
+        if remote_only and not job.get("remote"):
+            continue
+        if mode == "remote" and not job.get("remote"):
+            continue
+        if mode == "hybrid" and not job.get("hybrid"):
+            continue
+        if mode == "onsite" and (job.get("remote") or job.get("hybrid")):
+            continue
+        if experience is not None:
+            low = job.get("experience_min")
+            high = job.get("experience_max")
+            if low is None or high is None or not (low <= experience <= high):
+                continue
+        selected.append(job)
+    return selected
 
 
 def _filter_jobs(jobs, location, posted_within):
@@ -188,13 +506,21 @@ class CatalogProvider:
         token = apify_token()
         if token:
             try:
-                raw = run_actor(self.actor_id(), self.build_input(location, posted_within, keyword), token)
+                raw = run_actor(
+                    self.actor_id(),
+                    self.build_input(provider_location(location), posted_within, keyword),
+                    token,
+                )
+                jobs = [
+                    job for job in _normalize(raw, self.key)
+                    if location_matches(job["location"], location)
+                ]
                 return {
                     "provider": self.key,
                     "label": self.label,
                     "mode": "apify",
                     "message": f"Results from the {self.label} Apify Actor {self.actor_id()}.",
-                    "jobs": _normalize(raw, self.key),
+                    "jobs": jobs,
                 }
             except (OSError, ValueError, RuntimeError, TimeoutError) as exc:
                 catalog = self._from_catalog(location, posted_within)

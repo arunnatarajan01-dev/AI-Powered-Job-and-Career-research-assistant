@@ -25,6 +25,17 @@
                 </p>
             </div>
 
+            {% if case.source == 'sample' %}
+            <div class="review-stats">
+                <div class="review-stat warn"><strong>—</strong><span>ATS score</span></div>
+                <div class="review-stat"><strong>—</strong><span>Skill match</span></div>
+                <div class="review-stat"><strong style="font-size: 1.05rem;">—</strong><span>Status</span></div>
+                <div class="review-stat"><strong style="font-size: 1.05rem;">—</strong><span>Share</span></div>
+            </div>
+            <p class="summary-text" style="margin-bottom: 1rem;">
+                No live case. Analyze a resume in this session to see status, score, and share.
+            </p>
+            {% else %}
             <div class="review-stats">
                 <div class="review-stat warn"><strong>{{ case.ats_percentage }}</strong><span>ATS score</span></div>
                 <div class="review-stat"><strong>{{ case.skill_match }}%</strong><span>Skill match</span></div>
@@ -34,6 +45,7 @@
             <p class="summary-text" style="margin-bottom: 1rem;">
                 Live case {{ case.filename }} · {{ case.ats_score }} · audit {{ state.audit_status }} · candidate notice {{ state.candidate_notice or 'Not recorded' }}
             </p>
+            {% endif %}
 
             <div class="review-switch">
                 <a href="{{ url_for('review_scenarios_page', role='all', kind=selected_kind) }}" class="{{ 'active' if selected_role == 'all' else '' }}">All roles</a>

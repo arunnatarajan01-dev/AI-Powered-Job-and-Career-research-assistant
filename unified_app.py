@@ -3,6 +3,7 @@ AI-Powered Excellence Platform
 Main Entry Point
 """
 import os
+import re
 import sys
 import uuid
 import json
@@ -13,6 +14,7 @@ from dotenv import load_dotenv
 
 from agents import Orchestrator
 from evaluations import run_evaluations
+from exports.ats_pdf import build_ats_pdf, pdf_download_name
 from exports.xlsx import build_xlsx
 from hitl import (
     ACTIONS,
@@ -20,6 +22,7 @@ from hitl import (
     ROLES,
     SCREEN,
     apply_action,
+    ats_pdf_ready,
     authenticate,
     build_case,
     field_options,
@@ -31,8 +34,10 @@ from hitl import (
     stage_options,
     validate,
     public_users,
+    register_account,
 )
-from jobs import CITIES, POSTED_LABELS
+from jobs import POSTED_LABELS, parse_experience, parse_work_mode
+from jobs.skill_match import attach_skill_matches
 from middleware import agent_middleware, pipeline_steps
 from observability import recent_traces, trace_summary
 from safety.admin_alert import notify_admin
@@ -50,7 +55,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 # Import logic from Resume Analyzer components
 from parser.pdf_reader import extract_text_from_pdf
 from parser.docx_reader import extract_text_from_docx
-from parser.text_cleaning import clean_text, extract_email, extract_phone, extract_links
+from parser.text_cleaning import clean_text, extract_candidate_name, extract_email, extract_phone, extract_links
 from parser.section_extractor import extract_sections, extract_education_details, extract_experience_years
 from models.skill_extractor import extract_skills, get_skills_by_category, get_skill_names
 from models.ats_scorer import calculate_ats_score
@@ -68,6 +73,39 @@ from preparation.coding_practice import (
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY") or os.urandom(32)
+
+_SALARY_AMOUNT = re.compile(r"\d[\d,]*")
+
+
+def _group_indian(amount):
+    digits = str(abs(int(amount)))
+    if len(digits) <= 3:
+        return digits
+    last3 = digits[-3:]
+    rest = digits[:-3]
+    parts = []
+    while rest:
+        parts.append(rest[-2:])
+        rest = rest[:-2]
+    return ",".join(reversed(parts)) + "," + last3
+
+
+@app.template_filter("inr_salary")
+def inr_salary(value):
+    """Show a salary range with the rupee symbol and Indian digit grouping."""
+    text = "" if value is None else str(value).strip()
+    if not text:
+        return "₹—"
+    if "₹" in text:
+        return text
+    amounts = [int(chunk.replace(",", "")) for chunk in _SALARY_AMOUNT.findall(text)]
+    if not amounts:
+        return text
+    multiply = 10 if "$" in text or "USD" in text.upper() else 1
+    formatted = [f"₹{_group_indian(amount * multiply)}" for amount in amounts[:2]]
+    if len(formatted) == 1:
+        return formatted[0]
+    return f"{formatted[0]}–{formatted[1]}"
 
 
 @app.route("/health")
@@ -91,6 +129,26 @@ def _current_user():
     if not user or user.get("role") not in ROLES:
         return None
     return user
+
+
+def _safe_jobs_next(value):
+    """Stay on the jobs page after a resume upload."""
+    target = (value or "").strip()
+    if target.startswith("//") or not target.startswith("/jobs"):
+        return None
+    return target
+
+
+def _candidate_resume_skills():
+    """Skills from the jobs-page upload, or from the resume analyzed in this session."""
+    uploaded = session.get("job_resume_skills")
+    if uploaded:
+        return list(uploaded), session.get("job_resume_name") or "uploaded resume"
+    analysis = RESULTS_CACHE.get(session.get("last_analysis_id"))
+    names = (analysis or {}).get("skill_names") or []
+    if names:
+        return list(names), (analysis or {}).get("filename") or "analyzed resume"
+    return [], ""
 
 
 def _safe_review_next(value):
@@ -261,6 +319,11 @@ def analyze():
             current.meta["role_count"] = len(recommendations)
 
             result = {
+                'candidate_name': extract_candidate_name(raw_text) or extract_candidate_name(cleaned_text),
+                'resume_text': raw_text[:30000],
+                'sections': {
+                    key: value for key, value in sections.items() if isinstance(value, str)
+                },
                 'contact': {'email': email, 'phone': phone, 'links': links},
                 'sections_found': list(sections.keys()),
                 'skills': skills,
@@ -608,19 +671,41 @@ def _review_case():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Sign in as a candidate, hiring manager, or auditor."""
+    """Login as a candidate or mentor."""
     error = None
+    notice = session.pop("login_notice", None)
     next_url = _safe_review_next(request.values.get("next"))
     if request.method == "POST":
         user = authenticate(request.form.get("email"), request.form.get("password"))
         if user is None:
-            error = "That email and password do not match a review account."
+            error = "That email and password do not match an account."
         else:
             session["user"] = user
             return redirect(_landing_for(user, next_url))
     if _current_user() and request.method == "GET" and not error:
         return redirect(_landing_for(_current_user(), next_url))
-    return render_template("login.html", error=error, users=public_users(), next_url=next_url or "")
+    return render_template(
+        "login.html",
+        error=error,
+        notice=notice,
+        users=public_users(),
+        next_url=next_url or "",
+    )
+
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    """Create a candidate account."""
+    error = None
+    form = {"name": "", "email": ""}
+    if request.method == "POST":
+        form["name"] = request.form.get("name") or ""
+        form["email"] = request.form.get("email") or ""
+        error = register_account(form["name"], form["email"], request.form.get("password"))
+        if error is None:
+            session["login_notice"] = "Account created. Login with your email and password."
+            return redirect(url_for("login"))
+    return render_template("signup.html", error=error, form=form)
 
 
 @app.route("/logout")
@@ -641,23 +726,22 @@ def job_discovery():
     analysis = RESULTS_CACHE.get(session.get("last_analysis_id"))
     recommendations = (analysis or {}).get("recommendations") or []
     suggested = recommendations[0] if recommendations else {}
-    location = (request.args.get("location") or "").strip()
-    if not location and "location" not in request.args:
-        location = str(suggested.get("location") or "").split(",")[0].strip()
+    location = (request.args.get("location") or "").strip() or "All location"
     keyword = (request.args.get("keyword") or "").strip()
     if not keyword:
         keyword = str(suggested.get("title") or "software engineer").strip()
     posted = request.args.get("posted") or "week"
     if posted not in ("today", "week", "month"):
         posted = "week"
+    experience = parse_experience(request.args.get("experience"))
+    work_mode = parse_work_mode(request.args.get("work_mode"))
+    remote_only = request.args.get("remote") == "1"
     selected = request.args.getlist("provider")
     searched = "location" in request.args
     error = None
     results = []
     if searched:
-        if not location:
-            error = "Enter a location."
-        elif not selected:
+        if not selected:
             error = "Select at least one provider."
         else:
             with agent_middleware(
@@ -669,14 +753,25 @@ def job_discovery():
                 providers=",".join(selected),
             ) as gate:
                 current = gate.trace
-                with current.span("providers", keyword=keyword):
+                with current.span("providers", keyword=keyword, experience=experience or "", remote=remote_only, work_mode=work_mode):
                     results = Orchestrator().job_search(
-                        selected, location, posted, keyword, current
+                        selected,
+                        location,
+                        posted,
+                        keyword,
+                        current,
+                        experience=experience,
+                        remote_only=remote_only,
+                        work_mode=work_mode,
                     )["results"]
                 current.meta["source_count"] = len(results)
                 current.meta["job_count"] = sum(len(item.get("jobs") or []) for item in results)
     else:
-        selected = ["linkedin", "naukri"]
+        selected = ["naukri", "linkedin"]
+
+    resume_skills, resume_name = _candidate_resume_skills()
+    if searched and not error:
+        attach_skill_matches(results, resume_skills)
 
     return render_template(
         "jobs.html",
@@ -684,13 +779,71 @@ def job_discovery():
         location=location,
         keyword=keyword,
         posted=posted,
+        experience=experience,
+        work_mode=work_mode,
+        remote_only=remote_only,
+        experience_years=list(range(1, 26)),
         selected=selected,
         posted_labels=POSTED_LABELS,
-        cities=CITIES,
         searched=searched and not error,
         error=error,
         results=results,
+        resume_name=resume_name,
+        resume_skill_count=len(resume_skills),
+        resume_notice=session.pop("job_resume_notice", None),
+        resume_error=session.pop("job_resume_error", None),
     )
+
+
+@app.route("/jobs/resume", methods=["POST"])
+def job_resume_upload():
+    """Store skills from a newly uploaded resume for the job search."""
+    user = _current_user()
+    if user is None:
+        return redirect(url_for("login", next=request.full_path))
+    if user["role"] != "candidate":
+        return redirect(url_for("review_role", role=user["role"], action="approve", denied=1))
+
+    next_url = _safe_jobs_next(request.form.get("next")) or url_for("job_discovery")
+    upload = request.files.get("resume")
+    if upload is None or not upload.filename:
+        session["job_resume_error"] = "Choose a PDF or Word resume to upload."
+        return redirect(next_url)
+    if not allowed_file(upload.filename):
+        session["job_resume_error"] = "Upload a PDF or Word resume."
+        return redirect(next_url)
+
+    filename = secure_filename(upload.filename) or "resume"
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    upload.save(filepath)
+    try:
+        ext = filename.rsplit(".", 1)[-1].lower()
+        if ext == "pdf":
+            raw_text = extract_text_from_pdf(file_path=filepath)
+        else:
+            raw_text = extract_text_from_docx(file_path=filepath)
+        cleaned = clean_text(raw_text or "")
+        if len(cleaned.strip()) < 50:
+            session["job_resume_error"] = "Could not read enough text from that resume."
+            return redirect(next_url)
+        skill_names = get_skill_names(extract_skills(cleaned))
+        if not skill_names:
+            session["job_resume_error"] = "No skills were found in that resume."
+            return redirect(next_url)
+        session["job_resume_skills"] = skill_names
+        session["job_resume_name"] = filename
+        session["job_resume_notice"] = (
+            f"Uploaded {filename}. Job search will use {len(skill_names)} skills from this resume."
+        )
+    except Exception:
+        session["job_resume_error"] = "That resume could not be read. Try a PDF or Word file."
+        return redirect(next_url)
+    finally:
+        try:
+            os.remove(filepath)
+        except OSError:
+            pass
+    return redirect(next_url)
 
 
 @app.route("/jobs/export")
@@ -706,10 +859,22 @@ def job_export():
     posted = request.args.get("posted") or "week"
     if posted not in ("today", "week", "month"):
         posted = "week"
-    selected = request.args.getlist("provider") or ["linkedin", "naukri"]
+    experience = parse_experience(request.args.get("experience"))
+    work_mode = parse_work_mode(request.args.get("work_mode"))
+    remote_only = request.args.get("remote") == "1"
+    selected = request.args.getlist("provider") or ["naukri", "linkedin"]
     if not location:
         return redirect(url_for("job_discovery"))
-    results = Orchestrator().job_search(selected, location, posted, keyword, None)["results"]
+    results = Orchestrator().job_search(
+        selected,
+        location,
+        posted,
+        keyword,
+        None,
+        experience=experience,
+        remote_only=remote_only,
+        work_mode=work_mode,
+    )["results"]
     rows = []
     for bundle in results:
         for job in bundle.get("jobs") or []:
@@ -751,6 +916,25 @@ def observability_page():
         traces=recent_traces(limit=25),
         summary=trace_summary(),
         middleware_steps=pipeline_steps(),
+    )
+
+
+@app.route("/review/ats-pdf")
+def review_ats_pdf():
+    """Download the reviewed resume as a PDF after mentor approval and ATS above 75%."""
+    user = _current_user()
+    if user is None:
+        return redirect(url_for("login", next=request.path))
+    case, state = _review_case()
+    if not ats_pdf_ready(case, state):
+        return redirect(url_for("review_role", role=user["role"], action="approve"))
+    analysis_id = case.get("analysis_id")
+    result = RESULTS_CACHE.get(analysis_id) if case.get("source") != "sample" else None
+    return send_file(
+        build_ats_pdf(result, case),
+        as_attachment=True,
+        download_name=pdf_download_name(case.get("candidate_name")),
+        mimetype="application/pdf",
     )
 
 
@@ -891,6 +1075,7 @@ def review_role(role):
         stage_options=stage_options(),
         notice_options=notice_options(role),
         old_values=old_values,
+        ats_pdf_ready=ats_pdf_ready(case, state),
     )
 
 

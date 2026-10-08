@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create your account | AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
+</head>
+<body>
+    <div class="bg-animated"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="review-page login-page">
+        <div class="dashboard-container login-wrap">
+            <div class="dashboard-header">
+                <h1>Create your <span class="text-gradient">account</span></h1>
+                <p class="summary-text">Name, email, and a new password are required.</p>
+            </div>
+
+            {% if error %}
+            <div class="banner err">{{ error }}</div>
+            {% endif %}
+
+            <form class="login-form" method="post" action="{{ url_for('signup') }}">
+                <div class="field">
+                    <label for="name">Name</label>
+                    <input id="name" name="name" type="text" autocomplete="name" required value="{{ form.name }}">
+                </div>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required value="{{ form.email }}" placeholder="name@email.com">
+                </div>
+                <div class="field">
+                    <label for="password">New Password</label>
+                    <input id="password" name="password" type="password" autocomplete="new-password" required>
+                </div>
+                <button type="submit">Create account</button>
+            </form>
+            <p class="auth-switch">Already registered? <a href="{{ url_for('login') }}">Login</a></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -199,6 +199,15 @@
             renderInterviewQuestions(filtered);
         }
 
+        function escapeHtml(value) {
+            return String(value == null ? "" : value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
         function renderInterviewQuestions(questions) {
             const container = document.getElementById('interviewQuestions');
             
@@ -213,12 +222,16 @@
 
             container.innerHTML = questions.map((q, i) => `
                 <div class="practice-question-card" style="animation: fadeInUp 0.4s ease ${i * 0.05}s both;">
-                    <span class="question-difficulty difficulty-${q.difficulty}">${q.difficulty}</span>
+                    <span class="question-difficulty difficulty-${escapeHtml(q.difficulty)}">${escapeHtml(q.difficulty)}</span>
                     <div class="question-content">
-                        <h4>${q.question}</h4>
+                        <h4>${escapeHtml(q.question)}</h4>
                         <div class="question-meta">
-                            <span>📁 ${q.category}</span>
-                            <span>🏢 ${q.company}</span>
+                            <span>📁 ${escapeHtml(q.category)}</span>
+                            <span>🏢 ${escapeHtml(q.company)}</span>
+                        </div>
+                        <div class="question-answer">
+                            <strong>Answer</strong>
+                            <p>${escapeHtml(q.answer)}</p>
                         </div>
                     </div>
                 </div>

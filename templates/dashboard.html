@@ -147,7 +147,7 @@
                         <div class="job-meta">
                             <span>📍 {{ job.location }}</span>
                             <span>💼 {{ job.experience_level }}</span>
-                            <span>💰 {{ job.salary_range }}</span>
+                            <span>{{ job.salary_range | inr_salary }}</span>
                             <span>📅 {{ job.posted_date }}</span>
                         </div>
                         <div class="match-bar">

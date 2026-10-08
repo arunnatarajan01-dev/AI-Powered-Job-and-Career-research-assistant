@@ -1,0 +1,254 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+3 0 obj
+<< /Length 4181 >>
+stream
+BT
+/F2 16.0 Tf
+1 0 0 1 54 718.00 Tm
+(AnchorScore: Measuring Faithfulness in Document Question) Tj
+/F2 16.0 Tf
+1 0 0 1 54 696.00 Tm
+(Answering) Tj
+/F1 10.0 Tf
+1 0 0 1 54 671.00 Tm
+(Sofia Alvarez and Kenji Watanabe) Tj
+/F1 10.0 Tf
+1 0 0 1 54 654.00 Tm
+(Harborview Research Lab, Lisbon and Kyoto) Tj
+/F1 10.0 Tf
+1 0 0 1 54 637.00 Tm
+(Proceedings of the Workshop on Document Intelligence \(WDI\), 2025) Tj
+/F2 12.0 Tf
+1 0 0 1 54 613.00 Tm
+(Abstract) Tj
+/F1 11.0 Tf
+1 0 0 1 54 592.00 Tm
+(This paper introduces AnchorScore, a simple faithfulness metric for systems that answer) Tj
+/F1 11.0 Tf
+1 0 0 1 54 577.00 Tm
+(questions from an uploaded document. We built a test set of 200 questions written over 12) Tj
+/F1 11.0 Tf
+1 0 0 1 54 562.00 Tm
+(computer-science papers. When the system was required to answer from retrieved passages,) Tj
+/F1 11.0 Tf
+1 0 0 1 54 547.00 Tm
+(faithfulness was 91 percent. When the same questions were answered with no document) Tj
+/F1 11.0 Tf
+1 0 0 1 54 532.00 Tm
+(context, faithfulness fell to 54 percent. A chunk size of 800 tokens gave the best recall.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 517.00 Tm
+(Cutting chunks to 200 tokens lowered recall by 11 percentage points. Thirty-eight graduate) Tj
+/F1 11.0 Tf
+1 0 0 1 54 502.00 Tm
+(students rated answer helpfulness at a mean of 4.2 out of 5. We recommend reporting) Tj
+/F1 11.0 Tf
+1 0 0 1 54 487.00 Tm
+(AnchorScore beside accuracy whenever a system answers from uploaded files.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 462.00 Tm
+(1. Introduction) Tj
+/F1 11.0 Tf
+1 0 0 1 54 441.00 Tm
+(Document assistants often sound confident even when the answer is not supported by the file) Tj
+/F1 11.0 Tf
+1 0 0 1 54 426.00 Tm
+(the user uploaded. Accuracy against a gold label does not reveal that failure. AnchorScore) Tj
+/F1 11.0 Tf
+1 0 0 1 54 411.00 Tm
+(checks whether each factual claim in an answer appears in the retrieved passages. A claim) Tj
+/F1 11.0 Tf
+1 0 0 1 54 396.00 Tm
+(is anchored only when a human rater can point to a sentence in those passages that states) Tj
+/F1 11.0 Tf
+1 0 0 1 54 381.00 Tm
+(the same fact. The score is the percentage of claims that are anchored.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 363.00 Tm
+(The study was run at Harborview Research Lab between March and June 2025. The only language) Tj
+/F1 11.0 Tf
+1 0 0 1 54 348.00 Tm
+(in the corpus is English. The only domain is computer science. Those two limits are stated) Tj
+/F1 11.0 Tf
+1 0 0 1 54 333.00 Tm
+(again in Section 5 so they are easy to find.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 308.00 Tm
+(2. Test collection) Tj
+/F1 11.0 Tf
+1 0 0 1 54 287.00 Tm
+(Twelve papers were chosen from an internal reading list. None of them is a famous benchmark) Tj
+/F1 11.0 Tf
+1 0 0 1 54 272.00 Tm
+(paper, so memorized model knowledge is a weak substitute for the file. Two annotators wrote) Tj
+/F1 11.0 Tf
+1 0 0 1 54 257.00 Tm
+(200 questions. Each question has one short factual answer and a pointer to the supporting) Tj
+/F1 11.0 Tf
+1 0 0 1 54 242.00 Tm
+(sentence. Disagreements were resolved by a third annotator. The question types are) Tj
+/F1 11.0 Tf
+1 0 0 1 54 227.00 Tm
+(definition \(40\), numeric result \(70\), method detail \(50\), and limitation \(40\).) Tj
+/F1 11.0 Tf
+1 0 0 1 54 209.00 Tm
+(The numeric subset is the hardest slice. It includes counts, percentages, and named) Tj
+/F1 11.0 Tf
+1 0 0 1 54 194.00 Tm
+(thresholds such as the 800-token chunk size. A system that rounds 91 percent to about 90) Tj
+/F1 11.0 Tf
+1 0 0 1 54 179.00 Tm
+(percent is marked unanchored on that claim.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 154.00 Tm
+(3. Method) Tj
+/F1 11.0 Tf
+1 0 0 1 54 133.00 Tm
+(Passages are embedded with all-MiniLM-L6-v2, which produces 384-dimensional vectors. The) Tj
+/F1 11.0 Tf
+1 0 0 1 54 118.00 Tm
+(index is a FAISS flat L2 index. At question time the retriever returns the top 4 passages.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 103.00 Tm
+(The generator may use only those passages. Overlap between adjacent chunks is 150) Tj
+/F1 11.0 Tf
+1 0 0 1 54 88.00 Tm
+(characters when the chunk size is 1000 characters. That overlap setting is separate from) Tj
+/F1 11.0 Tf
+1 0 0 1 54 73.00 Tm
+(the 800-token experiment in Section 4.) Tj
+/F1 9 Tf
+1 0 0 1 54 32 Tm
+(Sample test paper  |  page 1 of 2) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 3016 >>
+stream
+BT
+/F1 11.0 Tf
+1 0 0 1 54 725.00 Tm
+(AnchorScore is computed after generation. Raters split the answer into claims, then mark) Tj
+/F1 11.0 Tf
+1 0 0 1 54 710.00 Tm
+(each claim anchored or unsupported. The metric ignores tone, grammar, and answer length. A) Tj
+/F1 11.0 Tf
+1 0 0 1 54 695.00 Tm
+(correct fact that is not present in the retrieved passages still counts as unsupported,) Tj
+/F1 11.0 Tf
+1 0 0 1 54 680.00 Tm
+(because the assistant was not allowed to leave the document.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 655.00 Tm
+(4. Experiments) Tj
+/F1 11.0 Tf
+1 0 0 1 54 634.00 Tm
+(Condition A used retrieval. Condition B used the same generator with an empty document.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 619.00 Tm
+(Condition A reached 91 percent faithfulness. Condition B reached 54 percent faithfulness.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 604.00 Tm
+(The 37-point gap is the main result of the paper. On the numeric subset alone, Condition A) Tj
+/F1 11.0 Tf
+1 0 0 1 54 589.00 Tm
+(scored 88 percent and Condition B scored 41 percent.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 571.00 Tm
+(We also varied chunk size while holding the retriever fixed. Chunks of 200, 400, 800, and) Tj
+/F1 11.0 Tf
+1 0 0 1 54 556.00 Tm
+(1200 tokens were compared on recall of the supporting sentence. The 800-token setting was) Tj
+/F1 11.0 Tf
+1 0 0 1 54 541.00 Tm
+(best. The 200-token setting reduced recall by 11 percentage points relative to 800 tokens.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 526.00 Tm
+(The 1200-token setting was 3 points below 800 because the extra context diluted the match.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 508.00 Tm
+(Helpfulness was rated by 38 graduate students on a 1-to-5 scale after they read the answer) Tj
+/F1 11.0 Tf
+1 0 0 1 54 493.00 Tm
+(and the source passage. The mean rating was 4.2. The median rating was 4. No rater was an) Tj
+/F1 11.0 Tf
+1 0 0 1 54 478.00 Tm
+(author of this paper.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 453.00 Tm
+(5. Limitations) Tj
+/F1 11.0 Tf
+1 0 0 1 54 432.00 Tm
+(The corpus is English only. The corpus is computer science only. AnchorScore needs human) Tj
+/F1 11.0 Tf
+1 0 0 1 54 417.00 Tm
+(raters, so it is not an automatic training loss. The generator was not compared across) Tj
+/F1 11.0 Tf
+1 0 0 1 54 402.00 Tm
+(model vendors. We did not test scanned image PDFs, because the loader expects selectable) Tj
+/F1 11.0 Tf
+1 0 0 1 54 387.00 Tm
+(text.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 362.00 Tm
+(6. Conclusion) Tj
+/F1 11.0 Tf
+1 0 0 1 54 341.00 Tm
+(Retrieval raised faithfulness from 54 percent to 91 percent on 200 questions. The best) Tj
+/F1 11.0 Tf
+1 0 0 1 54 326.00 Tm
+(chunk size in this study was 800 tokens. AnchorScore should be reported alongside accuracy) Tj
+/F1 11.0 Tf
+1 0 0 1 54 311.00 Tm
+(whenever a system answers from uploaded documents.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 286.00 Tm
+(References) Tj
+/F1 11.0 Tf
+1 0 0 1 54 265.00 Tm
+([1] Alvarez, S. and Watanabe, K. AnchorScore: Measuring Faithfulness in Document Question) Tj
+/F1 11.0 Tf
+1 0 0 1 54 250.00 Tm
+(Answering. WDI 2025.) Tj
+/F1 9 Tf
+1 0 0 1 54 32 Tm
+(Sample test paper  |  page 2 of 2) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Type /Pages /Count 2 /Kids [4 0 R 6 0 R] >>
+endobj
+8 0 obj
+<< /Type /Catalog /Pages 7 0 R >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000112 00000 n 
+0000000214 00000 n 
+0000004447 00000 n 
+0000004583 00000 n 
+0000007651 00000 n 
+0000007787 00000 n 
+0000007850 00000 n 
+trailer
+<< /Size 9 /Root 8 0 R >>
+startxref
+7899
+%%EOF

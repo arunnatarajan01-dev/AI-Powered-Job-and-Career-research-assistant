@@ -4,6 +4,8 @@ Company Questions - Serves company-specific interview questions from dataset.
 import os
 import csv
 
+from preparation.interview_answers import answer_for
+
 
 _questions_data = None
 
@@ -53,8 +55,13 @@ def get_company_questions(company=None, category=None, difficulty=None):
     
     if difficulty:
         filtered = [q for q in filtered if q['difficulty'].lower() == difficulty.lower()]
-    
-    return filtered
+
+    enriched = []
+    for question in filtered:
+        row = dict(question)
+        row["answer"] = answer_for(row.get("question", ""))
+        enriched.append(row)
+    return enriched
 
 
 def get_available_companies():

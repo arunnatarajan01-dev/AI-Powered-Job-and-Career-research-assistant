@@ -52,6 +52,9 @@ def execute_tool(name, arguments, context):
                 arguments.get("location") or "",
                 arguments.get("posted") or "week",
                 arguments.get("keyword") or "",
+                experience=arguments.get("experience"),
+                remote_only=bool(arguments.get("remote_only")),
+                work_mode=arguments.get("work_mode") or "",
             )
         }
     if name == "read_repository_request":

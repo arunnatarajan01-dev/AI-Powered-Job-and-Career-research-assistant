@@ -1,0 +1,257 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+3 0 obj
+<< /Length 4119 >>
+stream
+BT
+/F2 16.0 Tf
+1 0 0 1 54 718.00 Tm
+(CareerGraph: Skill-Gap Detection for Early-Career Software) Tj
+/F2 16.0 Tf
+1 0 0 1 54 696.00 Tm
+(Roles) Tj
+/F1 10.0 Tf
+1 0 0 1 54 671.00 Tm
+(Priya Nair and Arjun Mehta) Tj
+/F1 10.0 Tf
+1 0 0 1 54 654.00 Tm
+(Northbridge Institute of Applied Computing, Bengaluru) Tj
+/F1 10.0 Tf
+1 0 0 1 54 637.00 Tm
+(Journal of Applied Career Computing, Vol. 7, 2024) Tj
+/F2 12.0 Tf
+1 0 0 1 54 613.00 Tm
+(Abstract) Tj
+/F1 11.0 Tf
+1 0 0 1 54 592.00 Tm
+(CareerGraph compares a resume with a job posting and lists skills that the posting asks for) Tj
+/F1 11.0 Tf
+1 0 0 1 54 577.00 Tm
+(and the resume does not show. We evaluated it on 1,240 anonymized resumes and 860 job) Tj
+/F1 11.0 Tf
+1 0 0 1 54 562.00 Tm
+(postings collected from January 2022 through December 2023. Top-5 job-match accuracy was) Tj
+/F1 11.0 Tf
+1 0 0 1 54 547.00 Tm
+(81.4 percent, against 63.2 percent for a keyword baseline. Skill-gap precision was 0.76 and) Tj
+/F1 11.0 Tf
+1 0 0 1 54 532.00 Tm
+(skill-gap recall was 0.69. For data roles the most common missing skill was SQL. For) Tj
+/F1 11.0 Tf
+1 0 0 1 54 517.00 Tm
+(frontend roles the most common missing skill was TypeScript. The false-positive rate on) Tj
+/F1 11.0 Tf
+1 0 0 1 54 502.00 Tm
+(soft skills was 0.18, which is the main weakness of the tool.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 477.00 Tm
+(1. Introduction) Tj
+/F1 11.0 Tf
+1 0 0 1 54 456.00 Tm
+(Early-career applicants often apply to roles whose required skills are only partly visible) Tj
+/F1 11.0 Tf
+1 0 0 1 54 441.00 Tm
+(on the resume. A matcher that returns a job title without naming the missing skills is hard) Tj
+/F1 11.0 Tf
+1 0 0 1 54 426.00 Tm
+(to act on. CareerGraph returns both a ranked list of roles and a skill-gap list. This paper) Tj
+/F1 11.0 Tf
+1 0 0 1 54 411.00 Tm
+(measures those two outputs separately. Match accuracy answers whether the role is relevant.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 396.00 Tm
+(Gap precision answers whether a listed missing skill is truly absent from the resume and) Tj
+/F1 11.0 Tf
+1 0 0 1 54 381.00 Tm
+(truly required by the posting.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 363.00 Tm
+(All labeling was done in Bengaluru by four career coaches who were not the authors. The) Tj
+/F1 11.0 Tf
+1 0 0 1 54 348.00 Tm
+(coaches worked from written guidelines. Each resume-posting pair was labeled by two) Tj
+/F1 11.0 Tf
+1 0 0 1 54 333.00 Tm
+(coaches. A fifth coach broke ties.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 308.00 Tm
+(2. Data) Tj
+/F1 11.0 Tf
+1 0 0 1 54 287.00 Tm
+(The resume set contains 1,240 anonymized resumes. Names, phone numbers, and email addresses) Tj
+/F1 11.0 Tf
+1 0 0 1 54 272.00 Tm
+(were removed before labeling. The posting set contains 860 job postings. The collection) Tj
+/F1 11.0 Tf
+1 0 0 1 54 257.00 Tm
+(window is January 2022 through December 2023. Roles are limited to software engineering,) Tj
+/F1 11.0 Tf
+1 0 0 1 54 242.00 Tm
+(data science, and product-adjacent technical jobs. Internships shorter than three months) Tj
+/F1 11.0 Tf
+1 0 0 1 54 227.00 Tm
+(were kept, because they still list skills.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 209.00 Tm
+(We did not include design-only portfolios or executive biographies. Those documents lack) Tj
+/F1 11.0 Tf
+1 0 0 1 54 194.00 Tm
+(the skill lines CareerGraph expects. A resume with no skills section is still scored. In) Tj
+/F1 11.0 Tf
+1 0 0 1 54 179.00 Tm
+(that case the tool reads projects and experience lines.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 154.00 Tm
+(3. Method) Tj
+/F1 11.0 Tf
+1 0 0 1 54 133.00 Tm
+(CareerGraph extracts skill phrases with a dictionary, then embeds the remaining resume) Tj
+/F1 11.0 Tf
+1 0 0 1 54 118.00 Tm
+(sentences and the job description. Similarity is cosine similarity over normalized vectors.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 103.00 Tm
+(The top 5 postings are returned as matches. A skill is reported as a gap only when it) Tj
+/F1 11.0 Tf
+1 0 0 1 54 88.00 Tm
+(appears in the posting and no dictionary alias appears in the resume. Soft skills such as) Tj
+/F1 11.0 Tf
+1 0 0 1 54 73.00 Tm
+(leadership and communication use the same rule, which is why their false-positive rate is) Tj
+/F1 9 Tf
+1 0 0 1 54 32 Tm
+(Sample test paper  |  page 1 of 2) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 3048 >>
+stream
+BT
+/F1 11.0 Tf
+1 0 0 1 54 728.00 Tm
+(higher.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 710.00 Tm
+(The keyword baseline counts overlapping skill names and ignores embeddings. It is the only) Tj
+/F1 11.0 Tf
+1 0 0 1 54 695.00 Tm
+(baseline in this paper. We do not claim a comparison with large language models.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 670.00 Tm
+(4. Results) Tj
+/F1 11.0 Tf
+1 0 0 1 54 649.00 Tm
+(Top-5 job-match accuracy was 81.4 percent for CareerGraph and 63.2 percent for the keyword) Tj
+/F1 11.0 Tf
+1 0 0 1 54 634.00 Tm
+(baseline. The absolute gain is 18.2 points. Top-1 accuracy was 64.0 percent for CareerGraph) Tj
+/F1 11.0 Tf
+1 0 0 1 54 619.00 Tm
+(and 49.5 percent for the baseline. These match figures use the coach labels as ground) Tj
+/F1 11.0 Tf
+1 0 0 1 54 604.00 Tm
+(truth.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 586.00 Tm
+(Skill-gap precision was 0.76. Skill-gap recall was 0.69. Precision is higher than recall) Tj
+/F1 11.0 Tf
+1 0 0 1 54 571.00 Tm
+(because the tool stays silent when a skill mention is ambiguous. The most common missing) Tj
+/F1 11.0 Tf
+1 0 0 1 54 556.00 Tm
+(skill among data roles was SQL. The most common missing skill among frontend roles was) Tj
+/F1 11.0 Tf
+1 0 0 1 54 541.00 Tm
+(TypeScript. The most common missing skill among backend roles was Docker, but that third) Tj
+/F1 11.0 Tf
+1 0 0 1 54 526.00 Tm
+(finding is secondary and was not part of the pre-registered hypotheses.) Tj
+/F1 11.0 Tf
+1 0 0 1 54 508.00 Tm
+(The false-positive rate on soft skills was 0.18. The false-positive rate on technical) Tj
+/F1 11.0 Tf
+1 0 0 1 54 493.00 Tm
+(skills was 0.07. Soft-skill errors usually came from a resume that demonstrated the skill) Tj
+/F1 11.0 Tf
+1 0 0 1 54 478.00 Tm
+(in a bullet without using the dictionary phrase.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 453.00 Tm
+(5. Limitations) Tj
+/F1 11.0 Tf
+1 0 0 1 54 432.00 Tm
+(The study covers early-career software roles only. It does not measure interview) Tj
+/F1 11.0 Tf
+1 0 0 1 54 417.00 Tm
+(performance or hiring outcomes. The dictionary is English only. Postings outside the) Tj
+/F1 11.0 Tf
+1 0 0 1 54 402.00 Tm
+(2022-2023 window were excluded. CareerGraph does not invent skills that are absent from) Tj
+/F1 11.0 Tf
+1 0 0 1 54 387.00 Tm
+(both the resume and the posting.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 362.00 Tm
+(6. Conclusion) Tj
+/F1 11.0 Tf
+1 0 0 1 54 341.00 Tm
+(On 1,240 resumes and 860 postings, CareerGraph reached 81.4 percent top-5 match accuracy) Tj
+/F1 11.0 Tf
+1 0 0 1 54 326.00 Tm
+(and 0.76 skill-gap precision. SQL was the most common gap for data roles, and TypeScript) Tj
+/F1 11.0 Tf
+1 0 0 1 54 311.00 Tm
+(was the most common gap for frontend roles. The soft-skill false-positive rate of 0.18) Tj
+/F1 11.0 Tf
+1 0 0 1 54 296.00 Tm
+(remains the main weakness.) Tj
+/F2 12.0 Tf
+1 0 0 1 54 271.00 Tm
+(References) Tj
+/F1 11.0 Tf
+1 0 0 1 54 250.00 Tm
+([1] Nair, P. and Mehta, A. CareerGraph: Skill-Gap Detection for Early-Career Software) Tj
+/F1 11.0 Tf
+1 0 0 1 54 235.00 Tm
+(Roles. Journal of Applied Career Computing, 7, 2024.) Tj
+/F1 9 Tf
+1 0 0 1 54 32 Tm
+(Sample test paper  |  page 2 of 2) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Type /Pages /Count 2 /Kids [4 0 R 6 0 R] >>
+endobj
+8 0 obj
+<< /Type /Catalog /Pages 7 0 R >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000112 00000 n 
+0000000214 00000 n 
+0000004385 00000 n 
+0000004521 00000 n 
+0000007621 00000 n 
+0000007757 00000 n 
+0000007820 00000 n 
+trailer
+<< /Size 9 /Root 8 0 R >>
+startxref
+7869
+%%EOF

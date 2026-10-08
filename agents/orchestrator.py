@@ -84,7 +84,7 @@ class ResearchAgent:
 class CareerAgent:
     """Calls the job-search tool. It does not write research answers."""
 
-    def search(self, providers, location, posted, keyword, trace):
+    def search(self, providers, location, posted, keyword, trace, experience=None, remote_only=False, work_mode=None):
         with _step(trace, "career_agent", agent="career"):
             with _step(trace, "tool_call", tool="search_jobs"):
                 result = execute_tool(
@@ -94,6 +94,9 @@ class CareerAgent:
                         "location": location,
                         "posted": posted,
                         "keyword": keyword,
+                        "experience": experience,
+                        "remote_only": remote_only,
+                        "work_mode": work_mode or "",
                     },
                     {},
                 )
@@ -117,9 +120,18 @@ class Orchestrator:
         result["agents"] = list(DRAFT_ROUTE)
         return result
 
-    def job_search(self, providers, location, posted, keyword, trace=None):
+    def job_search(self, providers, location, posted, keyword, trace=None, experience=None, remote_only=False, work_mode=None):
         with _step(trace, "orchestrator", route=" > ".join(CAREER_ROUTE)):
-            results = CareerAgent().search(providers, location, posted, keyword, trace)
+            results = CareerAgent().search(
+                providers,
+                location,
+                posted,
+                keyword,
+                trace,
+                experience=experience,
+                remote_only=remote_only,
+                work_mode=work_mode,
+            )
         return {"results": results, "agents": list(CAREER_ROUTE), "tools": ["search_jobs"]}
 
 

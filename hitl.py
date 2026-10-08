@@ -1,7 +1,13 @@
 """Human review of a resume screen for candidate, hiring manager, and auditor."""
 
 import hmac
+import json
+import re
 from datetime import datetime, timezone
+from pathlib import Path
+
+from parser.text_cleaning import extract_candidate_name
+from werkzeug.security import check_password_hash, generate_password_hash
 
 ROLES = ("candidate", "hiring_manager", "auditor")
 ACTIONS = ("approve", "reject", "edit")
@@ -106,20 +112,92 @@ SAMPLE_ANALYSIS_ID = "a8f3c1e2-4b91-4d0a-9c77-1e2b6f0a91d4"
 
 CASE_STATE = {}
 _NEXT_DECISION = 2041
+_REGISTERED_PATH = Path(__file__).resolve().parent / "data" / "registered_users.json"
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def _profile(user):
+    return {
+        "email": user["email"],
+        "name": user["name"],
+        "role": user["role"],
+    }
+
+
+def _load_registered():
+    if not _REGISTERED_PATH.exists():
+        return []
+    try:
+        payload = json.loads(_REGISTERED_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    if not isinstance(payload, list):
+        return []
+    return [row for row in payload if isinstance(row, dict)]
+
+
+def _save_registered(users):
+    _REGISTERED_PATH.parent.mkdir(parents=True, exist_ok=True)
+    _REGISTERED_PATH.write_text(json.dumps(users, indent=2), encoding="utf-8")
+
+
+def _email_taken(email_value):
+    for user in USERS:
+        if user["email"].lower() == email_value:
+            return True
+    for user in _load_registered():
+        if str(user.get("email", "")).lower() == email_value:
+            return True
+    return False
+
+
+def register_account(name, email, password):
+    """Create a candidate account. Returns an error message, or None on success."""
+    name_value = " ".join((name or "").split())
+    email_value = (email or "").strip().lower()
+    password_value = password or ""
+    missing = []
+    if not name_value:
+        missing.append("Name")
+    if not email_value:
+        missing.append("Email")
+    if not password_value:
+        missing.append("New Password")
+    if missing:
+        verb = "is" if len(missing) == 1 else "are"
+        return f"{', '.join(missing)} {verb} required."
+    if _EMAIL_RE.match(email_value) is None:
+        return "Enter a valid email address."
+    if _email_taken(email_value):
+        return "An account with this email already exists."
+    users = _load_registered()
+    users.append({
+        "email": email_value,
+        "password_hash": generate_password_hash(password_value),
+        "name": name_value,
+        "role": "candidate",
+    })
+    _save_registered(users)
+    return None
 
 
 def public_users():
-    """Accounts safe to show on the sign-in page, including the demo password."""
-    return [
-        {
+    """Demo accounts on the login page. Auditor is omitted; hiring manager is shown as Mentor."""
+    visible = []
+    for user in USERS:
+        if user["role"] == "auditor":
+            continue
+        label = ROLE_COPY[user["role"]]["label"]
+        if user["role"] == "hiring_manager":
+            label = "Mentor"
+        visible.append({
             "email": user["email"],
             "password": user["password"],
             "name": user["name"],
             "role": user["role"],
-            "label": ROLE_COPY[user["role"]]["label"],
-        }
-        for user in USERS
-    ]
+            "label": label,
+        })
+    return visible
 
 
 def authenticate(email, password):
@@ -134,11 +212,13 @@ def authenticate(email, password):
             and hmac.compare_digest(user["password"], password_value)
         )
         if password_ok:
-            return {
-                "email": user["email"],
-                "name": user["name"],
-                "role": user["role"],
-            }
+            return _profile(user)
+    for user in _load_registered():
+        if str(user.get("email", "")).lower() != email_value:
+            continue
+        password_hash = user.get("password_hash") or ""
+        if password_hash and check_password_hash(password_hash, password_value):
+            return _profile(user)
     return None
 
 
@@ -166,6 +246,7 @@ def ensure_state(analysis_id):
             "history": [],
             "share": "Not granted",
             "candidate_notice": "Not recorded",
+            "mentor_approved": False,
         }
         CASE_STATE[analysis_id] = state
     return state
@@ -234,7 +315,11 @@ def build_case(result, analysis_id):
             "analysis_id": analysis_id,
             "source": "session",
             "filename": result.get("filename") or "resume",
-            "candidate_name": "Candidate",
+            "candidate_name": (
+                (result.get("candidate_name") or "").strip()
+                or extract_candidate_name(result.get("resume_text") or "")
+                or "Candidate"
+            ),
             "email": extracted_email,
             "phone": contact.get("phone") or "Not extracted",
             "ats_percentage": (result.get("ats") or {}).get("percentage", 0),
@@ -263,6 +348,24 @@ def build_case(result, analysis_id):
     display["decision_reason"] = state.get("latest_note") or "No hiring decision recorded yet."
     display["ats_score"] = f"{case['ats_percentage']} · {case['ats_grade']} · {case['ats_label']}"
     return display, state
+
+
+def mentor_approved(state):
+    """True after the mentor (hiring manager) has advanced this resume."""
+    if not state:
+        return False
+    if "mentor_approved" in state:
+        return bool(state["mentor_approved"])
+    return str(state.get("status") or "").startswith("Advanced")
+
+
+def ats_pdf_ready(case, state):
+    """Resume PDF download opens after mentor approval and an ATS score above 75%."""
+    try:
+        score = float(case.get("ats_percentage"))
+    except (TypeError, ValueError):
+        return False
+    return score > 75 and mentor_approved(state)
 
 
 def field_options(role):
@@ -513,6 +616,7 @@ def apply_action(role, action, form, case, state, actor_name=None):
         state["status"] = f"Advanced · {_label(stage_options(), form.get('stage'))}"
         state["latest_note"] = note
         state["decision_id"] = _decision_id()
+        state["mentor_approved"] = True
     elif action == "approve" and role == "auditor":
         state["audit_status"] = "Signed off"
         state["latest_note"] = note
@@ -527,12 +631,14 @@ def apply_action(role, action, form, case, state, actor_name=None):
         state["latest_note"] = note
         state["decision_id"] = _decision_id()
         state["candidate_notice"] = _label(notice_options(role), form.get("notice"))
+        state["mentor_approved"] = False
     elif action == "reject" and role == "auditor":
         state["prior_status"] = state["status"]
         state["audit_status"] = "Reopened"
         state["latest_note"] = note
         if form.get("next_step") == "return":
             state["status"] = "Pending"
+            state["mentor_approved"] = False
         state["candidate_notice"] = _label(notice_options(role), form.get("notice"))
     elif action == "edit" and role == "auditor":
         state["annotations"].append({
@@ -546,6 +652,7 @@ def apply_action(role, action, form, case, state, actor_name=None):
     elif action == "edit":
         state["prior_status"] = state["status"]
         state["status"] = "Pending"
+        state["mentor_approved"] = False
         state["overrides"][field] = (form.get("new_value") or "").strip()
         state["latest_note"] = note
 

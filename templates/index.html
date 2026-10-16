@@ -22,12 +22,19 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        html {
+            height: 100%;
+            overflow: hidden;
+            scrollbar-gutter: auto;
+        }
+
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-            min-height: 100vh;
+            overflow: hidden;
+            height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
         }
@@ -69,32 +76,41 @@
         /* Main Content */
         main {
             flex: 1;
+            min-height: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 7rem 2rem 4rem;
+            padding: 4.6rem 1.25rem 0.4rem;
             text-align: center;
+            overflow: hidden;
         }
 
-        .hero { max-width: 900px; margin-bottom: 4rem; }
-        .hero h1 { font-size: 2.75rem; line-height: 1.15; margin-bottom: 1.5rem; font-family: 'Outfit', sans-serif; }
-        .hero p { font-size: 1.25rem; color: var(--text-muted); max-width: 700px; margin: 0 auto; }
+        .hub-hero {
+            max-width: 900px;
+            margin-bottom: 1rem;
+            min-height: 0;
+            display: block;
+            padding: 0;
+            overflow: visible;
+        }
+        .hub-hero h1 { font-size: 1.85rem; line-height: 1.15; margin-bottom: 0.45rem; font-family: 'Outfit', sans-serif; font-weight: 700; }
+        .hub-hero p { font-size: 0.98rem; line-height: 1.35; color: var(--text-muted); max-width: 720px; margin: 0 auto; }
 
         /* Hub Cards */
         .hub-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 3rem;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
             width: 100%;
-            max-width: 1280px;
+            max-width: 1100px;
         }
 
         .hub-card {
             background: var(--glass);
             border: 1px solid var(--glass-border);
-            padding: 3rem;
-            border-radius: 2rem;
+            padding: 1.15rem 1rem 1rem;
+            border-radius: 1.25rem;
             text-decoration: none;
             color: inherit;
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -106,18 +122,19 @@
         }
 
         .hub-card:hover {
-            transform: translateY(-15px) scale(1.02);
+            transform: translateY(-6px);
             background: rgba(255, 255, 255, 0.05);
             border-color: var(--primary);
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
         }
 
-        .hub-card .icon { font-size: 4rem; margin-bottom: 2rem; filter: drop-shadow(0 0 10px var(--primary)); }
-        .hub-card h2 { font-size: 2rem; margin-bottom: 1rem; font-family: 'Outfit', sans-serif; }
+        .hub-card .icon { font-size: 2rem; margin-bottom: 0.45rem; filter: drop-shadow(0 0 10px var(--primary)); }
+        .hub-card h2 { font-size: 1.15rem; margin-bottom: 0.4rem; font-family: 'Outfit', sans-serif; }
         .hub-card p {
             color: var(--text-muted);
-            line-height: 1.5;
-            margin-bottom: 2rem;
+            line-height: 1.35;
+            font-size: 0.86rem;
+            margin-bottom: 0.75rem;
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
@@ -125,13 +142,13 @@
         }
 
         .btn-enter {
-            padding: 12px 30px;
+            padding: 8px 18px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none;
             border-radius: 50px;
             color: white;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 0.92rem;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -152,11 +169,13 @@
         }
         .hub-card:hover::before { transform: translateX(100%); }
 
-        footer { padding: 3rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
+        footer { padding: 0.35rem 1rem 0.65rem; text-align: center; color: var(--text-muted); font-size: 0.85rem; }
 
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 1.85rem; }
-            .navbar { padding: 1.5rem 2rem; }
+        @media (max-width: 900px) {
+            .hub-hero h1 { font-size: 1.45rem; }
+            .hub-grid { gap: 0.7rem; }
+            .hub-card { padding: 0.85rem 0.75rem; }
+            .hub-card p { -webkit-line-clamp: 2; }
         }
     </style>
 </head>
@@ -170,7 +189,7 @@
     {% include '_nav.html' %}
 
     <main>
-        <div class="hero">
+        <div class="hub-hero">
             <h1><span style="background: linear-gradient(135deg, #facc15, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AI Powered Job and Career research assistant</span></h1>
             <p>One unified platform for career acceleration and academic excellence. Analyze resumes with ATS-grade intelligence or construct peer-ready research papers autonomously.</p>
         </div>
@@ -183,6 +202,12 @@
                 <p>Upload a resume for ATS scoring, skill gaps, and job matches. Search LinkedIn and Naukri by location for today, last week, or last month.</p>
                 <div class="btn-enter">Open</div>
             </a>
+            <a href="/research" class="hub-card">
+                <div class="icon">⚛️</div>
+                <h2>Research Assistant</h2>
+                <p>Construct IEEE-standard research papers from code repositories and deconstruct complex PDFs with document-grounded AI.</p>
+                <div class="btn-enter">Enter Research Lab</div>
+            </a>
             {% else %}
             <a href="/review" class="hub-card">
                 <div class="icon">🗂️</div>
@@ -190,21 +215,19 @@
                 <p>Approve, reject, or correct a resume screening decision for this role.</p>
                 <div class="btn-enter">Open review</div>
             </a>
-            {% endif %}
-
-            <a href="/research" class="hub-card">
-                <div class="icon">⚛️</div>
-                <h2>Research Assistant</h2>
-                <p>Construct IEEE-standard research papers from code repositories and deconstruct complex PDFs with document-grounded AI.</p>
-                <div class="btn-enter">Enter Research Lab</div>
-            </a>
-
             <a href="{{ url_for('observability_page') }}" class="hub-card">
                 <div class="icon">📈</div>
-                <h2>Observability and Evaluations</h2>
-                <p>Inspect the middleware around each agent step, the traces those steps leave, and the local checks for guardrails, scores, and human-review rules.</p>
+                <h2>Observability</h2>
+                <p>Inspect the middleware around each agent step and the traces those steps leave.</p>
                 <div class="btn-enter">Open</div>
             </a>
+            <a href="{{ url_for('review_scenarios_page') }}" class="hub-card">
+                <div class="icon">🧪</div>
+                <h2>Evaluation</h2>
+                <p>Review the positive and negative cases for status, score, and share.</p>
+                <div class="btn-enter">Open</div>
+            </a>
+            {% endif %}
         </div>
     </main>
 

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ role_copy.label }} review | AI Resume Analyzer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}?v=candidates">
 </head>
 <body class="review-body">
     <div class="bg-animated"></div>
@@ -21,12 +21,35 @@
                 <h1>{{ screen.title }}</h1>
                 <p class="summary-text">
                     {% if case.source == 'sample' %}
-                    Sample screen for {{ case.candidate_name }}. Upload a resume from Home to review that analysis instead.
+                    No scanned resume is stored yet. Analyze a resume and it will appear in this list.
                     {% else %}
-                    Reviewing the resume analyzed in this browser session.
+                    Showing the latest scan for {{ case.candidate_name }}. Scanning that name again replaces this result.
                     {% endif %}
                 </p>
             </div>
+
+            <form class="candidate-filter" method="get" action="{{ url_for('review_role', role=role) }}">
+                <input type="hidden" name="action" value="{{ action }}">
+                <label for="candidateFilter">Candidate</label>
+                <select id="candidateFilter" name="candidate" onchange="this.form.submit()" {% if not candidates %}disabled{% endif %}>
+                    {% if not candidates %}
+                    <option value="">No scanned candidates</option>
+                    {% else %}
+                    {% for person in candidates %}
+                    <option value="{{ person.name }}" {% if person.name == selected_candidate %}selected{% endif %}>{{ person.name }}</option>
+                    {% endfor %}
+                    {% endif %}
+                </select>
+                {% if case.source != 'sample' %}
+                <button type="submit" form="deleteScan" class="secondary-action">Delete resume</button>
+                {% endif %}
+            </form>
+            {% if case.source != 'sample' %}
+            <form id="deleteScan" method="post" action="{{ url_for('review_delete') }}" onsubmit="return confirm('Delete the stored scan for this candidate?');">
+                <input type="hidden" name="candidate" value="{{ case.candidate_name }}">
+                <input type="hidden" name="review_action" value="{{ action }}">
+            </form>
+            {% endif %}
 
             {% if notice %}
             <div class="banner err">{{ notice }}</div>
@@ -80,7 +103,7 @@
                     </table>
                     {% if ats_pdf_ready %}
                     <div class="review-actions">
-                        <a class="ats-pdf-button" href="{{ url_for('review_ats_pdf') }}">Download ATS PDF</a>
+                        <a class="ats-pdf-button" href="{{ url_for('review_ats_pdf', candidate=case.candidate_name) }}">Download ATS PDF</a>
                     </div>
                     {% endif %}
                     <div class="constraint">{{ screen.constraint }}</div>
@@ -131,6 +154,7 @@
                           data-role="{{ role }}" data-action="{{ action }}"
                           data-old-values='{{ old_values | tojson }}'>
                         <input type="hidden" name="action" value="{{ action }}">
+                        <input type="hidden" name="candidate" value="{{ case.candidate_name if case.source != 'sample' else '' }}">
 
                         {% if action == 'approve' and role == 'candidate' %}
                         <div class="field">

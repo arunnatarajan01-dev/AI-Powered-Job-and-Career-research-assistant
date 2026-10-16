@@ -20,11 +20,18 @@
 
     <div class="dashboard">
         <div class="dashboard-container">
+            {% if not result and not memory.candidates %}
+            <div class="dashboard-header">
+                <h1>Dashboard</h1>
+                <p class="summary-text">No resume has been scanned for this account yet. A scan stays here until you analyze the next resume.</p>
+            </div>
+            {% else %}
             {% if not result %}
             <div class="dashboard-header">
                 <h1>Dashboard</h1>
-                <p class="summary-text">No resume analysis is stored for this session.</p>
+                <p class="summary-text">The saved scan stays on this dashboard until you analyze the next resume.</p>
             </div>
+            {% include '_session_memory.html' %}
             {% else %}
             <!-- Header -->
             <div class="dashboard-header">
@@ -121,13 +128,13 @@
                 <h3><span class="card-icon">💼</span> Top Job Recommendations</h3>
                 {% if current_user and current_user.role == 'candidate' %}
                 <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                    Search these roles on LinkedIn and Naukri from your candidate account.
+                    Search these roles on Naukri, LinkedIn, Indeed, Job Match Pro, and Foundit from your candidate account.
                     <a href="{{ url_for('job_discovery') }}">Open job discovery</a>
                 </p>
                 {% else %}
                 <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
                     <a href="{{ url_for('login', next='/jobs') }}">Sign in as a candidate</a>
-                    to search these roles on LinkedIn and Naukri.
+                    to search these roles on Naukri, LinkedIn, Indeed, Job Match Pro, and Foundit.
                 </p>
                 {% endif %}
                 <div class="dashboard-grid">
@@ -166,7 +173,7 @@
                         </div>
                         {% if current_user and current_user.role == 'candidate' %}
                         <div style="margin-top: 0.75rem;">
-                            <a href="{{ url_for('job_discovery', keyword=job.title, location=job.location, posted='week') }}&amp;provider=linkedin&amp;provider=naukri">Search LinkedIn and Naukri</a>
+                            <a href="{{ url_for('job_discovery', keyword=job.title, location=job.location, posted='week') }}&amp;provider=naukri&amp;provider=linkedin&amp;provider=indeed&amp;provider=job_match_pro&amp;provider=foundit">Search jobs</a>
                         </div>
                         {% endif %}
                     </div>
@@ -298,6 +305,8 @@
                 </div>
             </div>
 
+            {% include '_session_memory.html' %}
+
             <!-- Action Buttons -->
             <div style="text-align: center; padding: 2rem 0;">
                 <a href="/review" class="btn-analyze show" style="display: inline-block; width: auto; text-decoration: none;">
@@ -307,6 +316,7 @@
                     <span>🎯 Practice Interview</span>
                 </a>
             </div>
+            {% endif %}
             {% endif %}
         </div>
     </div>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Assistant | AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/voice.css') }}">
+</head>
+<body class="voice-body">
+    {% set nav_active = 'voice' %}
+    {% include '_nav.html' %}
+
+    <div class="voice-shell">
+        <aside class="voice-sidebar">
+            <h2 class="voice-topic-label">Select Topic</h2>
+            <div class="voice-topics">
+                {% set icons = {
+                    'Self Introduction': ('tone-blue', 'You'),
+                    'Generative AI': ('tone-purple', 'AI'),
+                    'Python': ('tone-yellow', 'Py')
+                } %}
+                {% for topic in topics %}
+                {% set icon = icons.get(topic, ('tone-blue', 'Q')) %}
+                <button type="button" class="subject-btn" data-subject="{{ topic }}">
+                    <span class="subject-icon {{ icon[0] }}">{{ icon[1] }}</span>
+                    <span>{{ topic }}</span>
+                </button>
+                {% endfor %}
+            </div>
+        </aside>
+
+        <main class="voice-main">
+            <header class="voice-header">
+                <h1>Master Your Interview</h1>
+                <p>Ace Your Technical Interviews with AI-Powered Practice and Feedback</p>
+            </header>
+
+            <div class="voice-content">
+                <div id="welcomeState" class="welcome-state">
+                    <button type="button" id="welcomeMic" class="welcome-mic" aria-label="Microphone ready, click to listen">
+                        <svg width="54" height="54" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                            <path d="M6 11a6 6 0 0 0 12 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            <path d="M12 17v4M8 21h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    <h2>Ready to Practice?</h2>
+                    <p id="welcomeHint">Select a topic from the sidebar to begin</p>
+                    <p class="mic-ready">Microphone ready — click to listen</p>
+                </div>
+
+                <div id="interviewState" class="interview-state hidden">
+                    <div class="interview-bar">
+                        <span class="question-count">Question <strong id="questionNum">1</strong>/<span id="questionTotal">0</span></span>
+                    </div>
+
+                    <div class="interviewer">
+                        <div class="interviewer-avatar" aria-hidden="true">N</div>
+                        <p>Natalie</p>
+                    </div>
+
+                    <p id="questionText" class="question-text"></p>
+
+                    <div id="speakingBubble" class="speaking-bubble hidden" aria-live="polite">
+                        <span class="dot dot-a"></span>
+                        <span class="dot dot-b"></span>
+                        <span class="dot dot-c"></span>
+                        <span>Natalie is speaking...</span>
+                    </div>
+
+                    <div class="voice-actions">
+                        <button type="button" id="startInterviewBtn" class="primary-btn">Start Interview</button>
+                        <button type="button" id="recordBtn" class="record-btn" aria-label="Click to listen" aria-pressed="false">
+                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                                <path d="M6 11a6 6 0 0 0 12 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                <path d="M12 17v4M8 21h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                        <p id="recordingStatus" class="recording-status">Microphone ready — click to listen</p>
+                        <button type="button" id="submitBtn" class="primary-btn hidden" disabled>Submit Answer</button>
+                        <button type="button" id="endInterviewBtn" class="ghost-btn" disabled>End Interview</button>
+                    </div>
+
+                    <section id="feedbackSection" class="feedback-section hidden">
+                        <div id="getFeedbackArea">
+                            <p>Interview completed!</p>
+                            <button type="button" id="getFeedbackBtn" class="primary-btn">Get Feedback</button>
+                        </div>
+                        <div id="feedbackContent" class="hidden">
+                            <div class="feedback-head">
+                                <div>
+                                    <p class="recording-status">Detailed Feedback</p>
+                                    <h3 id="feedbackSubject" class="gradient-heading">Subject</h3>
+                                </div>
+                                <div class="score-ring" aria-label="Score out of 5">
+                                    <svg width="96" height="96" viewBox="0 0 96 96">
+                                        <circle cx="48" cy="48" r="40" stroke="#27272a" stroke-width="5" fill="none"></circle>
+                                        <circle id="scoreCircle" cx="48" cy="48" r="40" stroke="#764ba2" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+                                    </svg>
+                                    <div>
+                                        <strong id="scoreValue">0</strong>
+                                        <span>/5</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <article class="feedback-card">
+                                <h4 class="gradient-heading">Feedback</h4>
+                                <p id="feedbackText"></p>
+                            </article>
+                            <article class="feedback-card">
+                                <h4 class="gradient-heading">Areas of Improvement</h4>
+                                <p id="improvementText"></p>
+                            </article>
+                            <button type="button" id="newInterviewBtn" class="primary-btn">Start New Interview</button>
+                        </div>
+                    </section>
+                </div>
+
+                <section class="transcript-panel" aria-labelledby="transcriptHeading">
+                    <h3 id="transcriptHeading">Live Transcript</h3>
+                    <textarea id="liveTranscript" placeholder="Live transcript will appear here." aria-label="Live transcript. Speech becomes AI text."></textarea>
+                    <div id="aiReply" class="ai-reply hidden">
+                        <strong>AI</strong>
+                        <span id="aiReplyText"></span>
+                    </div>
+                    <p id="voiceError" class="voice-error" role="alert"></p>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script id="voice-data" type="application/json">{{ {"questions": questions} | tojson }}</script>
+    <script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+</body>
+</html>

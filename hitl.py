@@ -3,7 +3,8 @@
 import hmac
 import json
 import re
-from datetime import datetime, timezone
+import secrets
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from parser.text_cleaning import extract_candidate_name
@@ -113,6 +114,8 @@ SAMPLE_ANALYSIS_ID = "a8f3c1e2-4b91-4d0a-9c77-1e2b6f0a91d4"
 CASE_STATE = {}
 _NEXT_DECISION = 2041
 _REGISTERED_PATH = Path(__file__).resolve().parent / "data" / "registered_users.json"
+_RESET_PATH = Path(__file__).resolve().parent / "data" / "password_resets.json"
+_RESET_MINUTES = 30
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
@@ -179,6 +182,76 @@ def register_account(name, email, password):
     })
     _save_registered(users)
     return None
+
+
+def issue_reset_token(email):
+    """Store a short-lived reset token for a registered account."""
+    email_value = (email or "").strip().lower()
+    if _EMAIL_RE.match(email_value) is None:
+        return "Enter a valid email address.", None
+    for user in USERS:
+        if user["email"].lower() == email_value:
+            return "Demo account passwords are listed on the login page.", None
+    if not any(str(user.get("email", "")).lower() == email_value for user in _load_registered()):
+        return "No account uses that email.", None
+    token = secrets.token_urlsafe(32)
+    pending = _load_resets()
+    pending[token] = {
+        "email": email_value,
+        "expires": (datetime.now(timezone.utc) + timedelta(minutes=_RESET_MINUTES)).isoformat(),
+    }
+    _save_resets(pending)
+    return None, token
+
+
+def apply_reset_token(token, password):
+    """Set a new password when the emailed token is still valid."""
+    password_value = password or ""
+    if not password_value:
+        return "New Password is required."
+    pending = _load_resets()
+    record = pending.get(token or "")
+    if not record:
+        return "This reset link is invalid or has already been used."
+    expires = datetime.fromisoformat(record["expires"])
+    if expires.tzinfo is None:
+        expires = expires.replace(tzinfo=timezone.utc)
+    if datetime.now(timezone.utc) > expires:
+        pending.pop(token, None)
+        _save_resets(pending)
+        return "This reset link has expired. Request a new one."
+    email_value = record["email"]
+    users = _load_registered()
+    matched = False
+    for user in users:
+        if str(user.get("email", "")).lower() != email_value:
+            continue
+        user["password_hash"] = generate_password_hash(password_value)
+        matched = True
+        break
+    if not matched:
+        return "No account uses that email."
+    _save_registered(users)
+    pending.pop(token, None)
+    _save_resets(pending)
+    return None
+
+
+def _load_resets():
+    if not _RESET_PATH.exists():
+        return {}
+    try:
+        payload = json.loads(_RESET_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if not isinstance(payload, dict):
+        return {}
+    return payload
+
+
+def _save_resets(pending):
+    _RESET_PATH.parent.mkdir(parents=True, exist_ok=True)
+    _RESET_PATH.write_text(json.dumps(pending, indent=2), encoding="utf-8")
 
 
 def public_users():

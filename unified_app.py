@@ -7,6 +7,7 @@ import re
 import sys
 import uuid
 import json
+from datetime import datetime
 from flask import Flask, abort, render_template, request, jsonify, redirect, url_for, session, send_file
 from werkzeug.utils import secure_filename
 import google.generativeai as genai
@@ -35,12 +36,32 @@ from hitl import (
     validate,
     public_users,
     register_account,
+    apply_reset_token,
+    issue_reset_token,
 )
-from jobs import POSTED_LABELS, parse_experience, parse_work_mode
+from jobs import POSTED_LABELS, PROVIDER_OPTIONS, parse_experience, parse_work_mode
 from jobs.skill_match import attach_skill_matches
+from memory.applications import application_counts, record_application
+from memory.pinecone_memory import (
+    delete_candidate_scan,
+    list_candidates,
+    load_candidate_scan,
+    load_user_scan,
+    save_user_scan,
+    scan_id_for,
+)
+from memory.session_store import (
+    add_message,
+    answer_from_memory,
+    end_session,
+    load_memory,
+    remember_analysis,
+    remember_jobs,
+)
 from middleware import agent_middleware, pipeline_steps
 from observability import recent_traces, trace_summary
-from safety.admin_alert import notify_admin
+from safety.admin_alert import _smtp_settings, notify_admin
+from safety.review_mail import _deliver
 from safety.guardrail import check_output, check_text
 
 # Load API Keys
@@ -57,6 +78,7 @@ from parser.pdf_reader import extract_text_from_pdf
 from parser.docx_reader import extract_text_from_docx
 from parser.text_cleaning import clean_text, extract_candidate_name, extract_email, extract_phone, extract_links
 from parser.section_extractor import extract_sections, extract_education_details, extract_experience_years
+from models.bert_matcher import warm_matcher
 from models.skill_extractor import extract_skills, get_skills_by_category, get_skill_names
 from models.ats_scorer import calculate_ats_score
 from models.resume_feedback import generate_feedback, get_overall_summary
@@ -70,6 +92,7 @@ from preparation.coding_practice import (
     get_coding_questions, get_available_companies as get_coding_companies,
     get_available_topics, get_company_coding_stats, get_recommended_problems
 )
+from preparation.voice_interview import TOPICS, feedback_for, load_catalog, questions_for, reply_to_answer
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY") or os.urandom(32)
@@ -131,6 +154,45 @@ def _current_user():
     return user
 
 
+_PUBLIC_ENDPOINTS = {
+    "home_page",
+    "main_page",
+    "welcome_page",
+    "resume_home",
+    "index",
+    "login",
+    "signup",
+    "forgot_password",
+    "reset_with_token",
+    "health",
+    "static",
+    "analyze",
+}
+_GUEST_ANALYSIS_ENDPOINTS = {"dashboard", "dashboard_chat", "dashboard_export"}
+
+
+@app.before_request
+def _signed_out_stays_on_home():
+    """After sign-out, a stored page must open the public main page again."""
+    endpoint = request.endpoint or ""
+    if endpoint in _PUBLIC_ENDPOINTS or endpoint.startswith("static"):
+        return None
+    if _current_user() is not None:
+        return None
+    if endpoint in _GUEST_ANALYSIS_ENDPOINTS and session.get("last_analysis_id"):
+        return None
+    return redirect(url_for("welcome_page"))
+
+
+@app.after_request
+def _do_not_cache_pages(response):
+    """Stop the back button from showing a signed-in page from memory."""
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
 def _safe_jobs_next(value):
     """Stay on the jobs page after a resume upload."""
     target = (value or "").strip()
@@ -140,15 +202,163 @@ def _safe_jobs_next(value):
 
 
 def _candidate_resume_skills():
-    """Skills from the jobs-page upload, or from the resume analyzed in this session."""
+    """Skills from the latest attached resume, or from the scanned resume when that is newer."""
+    analysis = _current_analysis()
+    analysis_id = session.get("last_analysis_id") or ""
     uploaded = session.get("job_resume_skills")
+    upload_for = session.get("job_resume_after_analysis") or ""
+    scanned = (analysis or {}).get("skill_names") or []
+    if uploaded and (not analysis_id or upload_for == analysis_id):
+        return list(uploaded), session.get("job_resume_name") or "uploaded resume"
+    if scanned:
+        return list(scanned), (analysis or {}).get("filename") or "scanned resume"
     if uploaded:
         return list(uploaded), session.get("job_resume_name") or "uploaded resume"
-    analysis = RESULTS_CACHE.get(session.get("last_analysis_id"))
-    names = (analysis or {}).get("skill_names") or []
-    if names:
-        return list(names), (analysis or {}).get("filename") or "analyzed resume"
     return [], ""
+
+
+def _upload_is_current_resume():
+    """True when the jobs-page upload is the resume used for scoring."""
+    analysis_id = session.get("last_analysis_id") or ""
+    uploaded = session.get("job_resume_skills")
+    upload_for = session.get("job_resume_after_analysis") or ""
+    return bool(uploaded) and (not analysis_id or upload_for == analysis_id)
+
+
+def _active_resume(user):
+    """Candidate resume the application counts belong to."""
+    analysis = _current_analysis()
+    if _upload_is_current_resume():
+        candidate = (session.get("job_resume_candidate") or "").strip()
+        resume = session.get("job_resume_name") or "uploaded resume"
+        return candidate or resume, resume
+    if analysis and ((analysis.get("skill_names") or []) or analysis.get("candidate_name")):
+        candidate = (analysis.get("candidate_name") or "").strip()
+        resume = analysis.get("filename") or "scanned resume"
+        return candidate or resume, resume
+    if session.get("job_resume_skills"):
+        candidate = (session.get("job_resume_candidate") or "").strip()
+        resume = session.get("job_resume_name") or "uploaded resume"
+        return candidate or resume, resume
+    return "", ""
+
+
+def _resume_application_counts(user):
+    candidate, _resume = _active_resume(user)
+    tracked = bool(candidate)
+    counts = application_counts(user.get("email") or "", candidate)
+    counts["tracked"] = tracked
+    return counts
+
+
+_COVER_LETTER_BODY = """Subject:  Application for suitable position
+
+To : 
+
+Dear Hiring Manager,
+
+I am writing to express my interest in applying for a suitable position within your organization. Please find my resume attached for your review.
+
+With over 18 years of experience in Software Testing and QA, including automation, API testing, performance testing, and Agile/Scrum methodologies, I bring a strong background in ensuring quality and efficiency in software delivery. My recent work includes building RAG-based customer support assistants using FastAPI, ChromaDB, Groq LLM, and Streamlit, as well as containerized deployments with Docker.
+
+I am confident that my skills and experience align well with the requirements of your team, and I would welcome the opportunity to contribute to your projects.
+
+Thank you for considering my application. I look forward to the possibility of discussing how I can add value to your organization.
+
+Best regards,
+"""
+_COVER_LETTER_LIMIT = 8000
+_SKILL_LINE = re.compile(r"^My skill set includes .+$", re.M)
+_LEGACY_SKILL_PARAGRAPH = re.compile(
+    r"With over 18 years of experience in Software Testing and QA, including .+?Docker\.",
+    re.S,
+)
+
+
+def _skill_key(skills):
+    return "|".join(str(name).strip().lower() for name in skills or [] if str(name).strip())
+
+
+def _join_skills(names):
+    if not names:
+        return ""
+    if len(names) == 1:
+        return names[0]
+    if len(names) == 2:
+        return f"{names[0]} and {names[1]}"
+    return ", ".join(names[:-1]) + ", and " + names[-1]
+
+
+def _spread_skills(skills, limit=12):
+    """Spread the resume skill set across categories so one group does not crowd out the rest."""
+    from models.skill_extractor import SKILLS_DB
+
+    groups = {}
+    order = []
+    for name in skills or []:
+        text = str(name or "").strip()
+        if not text:
+            continue
+        category = (SKILLS_DB.get(text.lower()) or {}).get("category") or "Other"
+        bucket = groups.setdefault(category, [])
+        if text not in bucket:
+            bucket.append(text)
+            if category not in order:
+                order.append(category)
+    ranked = sorted(order, key=lambda category: (-len(groups[category]), order.index(category)))
+    buckets = [list(groups[category]) for category in ranked]
+    selected = []
+    while len(selected) < limit and any(buckets):
+        for bucket in buckets:
+            if bucket and len(selected) < limit:
+                selected.append(bucket.pop(0))
+    return selected
+
+
+def _skill_set_sentence(skills):
+    selected = _spread_skills(skills)
+    if not selected:
+        return ""
+    return (
+        f"My skill set includes {_join_skills(selected)}. "
+        "I bring this background to ensuring quality and efficiency in software delivery."
+    )
+
+
+def _sync_cover_letter_skills(letter, skills):
+    """Put the current resume skill set into the letter, replacing an older skill paragraph."""
+    sentence = _skill_set_sentence(skills)
+    if not sentence:
+        return letter
+    if _SKILL_LINE.search(letter):
+        return _SKILL_LINE.sub(sentence, letter, count=1)
+    if _LEGACY_SKILL_PARAGRAPH.search(letter):
+        return _LEGACY_SKILL_PARAGRAPH.sub(sentence, letter, count=1)
+    marker = "Please find my resume attached for your review."
+    if marker in letter:
+        return letter.replace(marker, marker + "\n\n" + sentence, 1)
+    return sentence + "\n\n" + letter
+
+
+def _default_cover_letter(name, skills=None):
+    """Standard cover letter, signed with the account name and filled from the resume skill set."""
+    letter = _COVER_LETTER_BODY.rstrip() + "\n"
+    signature = " ".join((name or "").split())
+    if signature:
+        letter += signature + "\n"
+    return _sync_cover_letter_skills(letter, skills)
+
+
+def _cover_letter_for_page(name):
+    """Saved letter, with its skill sentence refreshed when the resume skill set changes."""
+    skills, _resume_name = _candidate_resume_skills()
+    key = _skill_key(skills)
+    saved = session.get("job_cover_letter")
+    if isinstance(saved, str) and saved.strip():
+        if session.get("job_cover_skill_key") == key:
+            return saved
+        return _sync_cover_letter_skills(saved, skills)
+    return _default_cover_letter(name, skills)
 
 
 def _safe_review_next(value):
@@ -168,7 +378,56 @@ def _home_for(user):
 
 def _landing_for(user, next_url):
     """After sign-in, open the role landing page."""
-    return url_for("index")
+    return url_for("hub_page")
+
+
+def _memory_id():
+    """SQLite session for this browser. Cleared on logout."""
+    memory_id = session.get("memory_id")
+    if not memory_id:
+        memory_id = str(uuid.uuid4())
+        session["memory_id"] = memory_id
+    return memory_id
+
+
+def _memory_label():
+    user = _current_user()
+    if user:
+        return user.get("email") or user.get("name") or "anonymous"
+    return "anonymous"
+
+
+def _bind_stored_scan(email):
+    """Put this account's last scan back into the dashboard session."""
+    stored = load_user_scan(email) if email else None
+    if not stored:
+        session.pop("last_analysis_id", None)
+        return
+    analysis_id = scan_id_for(email, stored.get("candidate_name"))
+    RESULTS_CACHE[analysis_id] = stored
+    session["last_analysis_id"] = analysis_id
+    remember_analysis(_memory_id(), email, stored)
+
+
+def _current_analysis():
+    """Latest resume scan for the signed-in user. It stays until the next scan."""
+    analysis_id = session.get("last_analysis_id")
+    cached = RESULTS_CACHE.get(analysis_id) if analysis_id else None
+    if cached is not None:
+        return cached
+    user = _current_user()
+    email = (user or {}).get("email") or ""
+    if not email:
+        return None
+    stored = load_user_scan(email)
+    if not stored:
+        return None
+    analysis_id = scan_id_for(email, stored.get("candidate_name"))
+    RESULTS_CACHE[analysis_id] = stored
+    session["last_analysis_id"] = analysis_id
+    if not load_memory(session.get("memory_id"))["candidates"]:
+        remember_analysis(_memory_id(), email, stored)
+    return stored
 
 # Server-side results storage for Resume Analyzer
 RESULTS_CACHE = {}
@@ -222,10 +481,34 @@ def enforce_output_guardrail(text, endpoint):
 
 @app.route('/')
 def index():
-    """Landing page for a signed-in user."""
+    """Send a new visit to /welcome. A signed-in person opens the hub."""
     if _current_user() is None:
-        return redirect(url_for("login"))
+        return redirect(url_for("welcome_page"))
+    return redirect(url_for("hub_page"))
+
+
+@app.route('/Hub')
+def hub_page():
+    """Signed-in hub. The address is /Hub."""
     return render_template('index.html')
+
+
+@app.route('/welcome')
+def welcome_page():
+    """First page of the application."""
+    return render_template('welcome.html')
+
+
+@app.route('/home')
+def home_page():
+    """Home page. The address is /home."""
+    return render_template('resume_index.html', active_nav='main')
+
+
+@app.route('/main')
+def main_page():
+    """Older address for the home page."""
+    return redirect(url_for("home_page"))
 
 # ========================================================
 # --- RESUME ANALYZER ROUTES ---
@@ -235,17 +518,14 @@ def _block_staff():
     """Hiring managers and auditors do not use the candidate career pages."""
     user = _current_user()
     if user and user["role"] in ("hiring_manager", "auditor"):
-        return redirect(url_for("index"))
+        return redirect(url_for("hub_page"))
     return None
 
 
 @app.route('/resume')
 def resume_home():
-    """Resume Analyzer upload page."""
-    blocked = _block_staff()
-    if blocked:
-        return blocked
-    return render_template('resume_index.html')
+    """Older address for the main page."""
+    return redirect(url_for("home_page"))
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -345,8 +625,13 @@ def analyze():
             }
 
             analysis_id = str(uuid.uuid4())
+            owner = (_current_user() or {}).get("email") or (result.get("contact") or {}).get("email") or ""
+            saved_id = save_user_scan(owner, result)
+            if saved_id:
+                analysis_id = saved_id
             RESULTS_CACHE[analysis_id] = result
             session['last_analysis_id'] = analysis_id
+            remember_analysis(_memory_id(), _memory_label(), result)
             return jsonify({'success': True, 'redirect': url_for('dashboard')})
 
     except Exception as e:
@@ -358,9 +643,35 @@ def dashboard():
     blocked = _block_staff()
     if blocked:
         return blocked
-    analysis_id = session.get('last_analysis_id')
-    result = RESULTS_CACHE.get(analysis_id) if analysis_id else None
-    return render_template('dashboard.html', result=result)
+    result = _current_analysis()
+    return render_template(
+        'dashboard.html',
+        result=result,
+        memory=load_memory(session.get("memory_id")),
+        memory_error=session.pop("memory_chat_error", None),
+    )
+
+
+@app.route("/dashboard/chat", methods=["POST"])
+def dashboard_chat():
+    """Save a question and answer against the SQLite session memory."""
+    blocked = _block_staff()
+    if blocked:
+        return blocked
+    message = request.form.get("message") or ""
+    guard = enforce_guardrail(message, "/dashboard/chat", "message")
+    if guard:
+        session["memory_chat_error"] = guard.plain_message
+        return redirect(url_for("dashboard"))
+    memory_id = session.get("memory_id")
+    stored = load_memory(memory_id)
+    if not stored["candidates"]:
+        session["memory_chat_error"] = "Scan a resume before chatting about this session."
+        return redirect(url_for("dashboard"))
+    add_message(memory_id, "user", message)
+    reply = answer_from_memory(load_memory(memory_id), message)
+    add_message(memory_id, "assistant", reply)
+    return redirect(url_for("dashboard") + "#session-memory")
 
 
 def _analysis_workbook(result):
@@ -424,8 +735,7 @@ def dashboard_export():
     blocked = _block_staff()
     if blocked:
         return blocked
-    analysis_id = session.get("last_analysis_id")
-    result = RESULTS_CACHE.get(analysis_id) if analysis_id else None
+    result = _current_analysis()
     if not result:
         return redirect(url_for("dashboard"))
     return send_file(
@@ -662,8 +972,17 @@ def api_constructor_generate():
 
 
 def _review_case():
-    analysis_id = session.get("last_analysis_id")
-    result = RESULTS_CACHE.get(analysis_id) if analysis_id else None
+    """Review screen for the selected candidate, or the latest scan."""
+    user = _current_user()
+    email = (user or {}).get("email") or ""
+    selected = (request.values.get("candidate") or "").strip()
+    result = load_candidate_scan(email, selected) if email and selected else None
+    if result is not None:
+        analysis_id = scan_id_for(email, result.get("candidate_name") or selected)
+        RESULTS_CACHE[analysis_id] = result
+    else:
+        result = _current_analysis()
+        analysis_id = session.get("last_analysis_id")
     if result is None:
         return build_case(None, None)
     return build_case(result, analysis_id)
@@ -680,7 +999,17 @@ def login():
         if user is None:
             error = "That email and password do not match an account."
         else:
+            previous = session.get("user") or {}
+            if previous.get("email") and previous.get("email") != user["email"]:
+                end_session(session.get("memory_id"))
+                session.pop("memory_id", None)
+                session.pop("last_analysis_id", None)
+                session.pop("job_cover_letter", None)
+                session.pop("job_cover_skill_key", None)
+                session.pop("job_resume_after_analysis", None)
+                session.pop("job_resume_candidate", None)
             session["user"] = user
+            _bind_stored_scan(user.get("email") or "")
             return redirect(_landing_for(user, next_url))
     if _current_user() and request.method == "GET" and not error:
         return redirect(_landing_for(_current_user(), next_url))
@@ -690,28 +1019,94 @@ def login():
         notice=notice,
         users=public_users(),
         next_url=next_url or "",
+        year=datetime.now().year,
     )
+
+
+def _send_reset_link(recipient, link):
+    """Email the reset link. Returns an error message, or None when it is sent."""
+    settings = _smtp_settings()
+    if not settings["ready"]:
+        return (
+            "Email is not configured. Add SMTP_HOST, SMTP_PORT, SMTP_USER, "
+            "SMTP_PASSWORD, and SMTP_FROM to .env."
+        )
+    body = "\n".join([
+        "Use this link to reset your password:",
+        link,
+        "",
+        "The link expires in 30 minutes.",
+        "If you did not ask for this, you can ignore the email.",
+    ])
+    try:
+        _deliver(settings, recipient, "Reset your password", body)
+    except Exception as exc:
+        return f"The reset email could not be sent: {exc}"
+    return None
+
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    """Email a reset link, then return the person to login."""
+    error = None
+    form = {"email": ""}
+    if request.method == "POST":
+        form["email"] = request.form.get("email") or ""
+        error, token = issue_reset_token(form["email"])
+        if error is None:
+            link = url_for("reset_with_token", token=token, _external=True)
+            error = _send_reset_link(form["email"].strip(), link)
+        if error is None:
+            session["login_notice"] = "A reset link was sent to your email."
+            return redirect(url_for("login"))
+    return render_template("forgot_password.html", error=error, form=form)
+
+
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_with_token(token):
+    """Choose a new password from the link in the reset email."""
+    error = None
+    if request.method == "POST":
+        error = apply_reset_token(token, request.form.get("password"))
+        if error is None:
+            session["login_notice"] = "Password updated. Login with your email and new password."
+            return redirect(url_for("login"))
+    return render_template("reset_link.html", error=error)
 
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     """Create a candidate account."""
     error = None
-    form = {"name": "", "email": ""}
+    warning = None
+    form = {"name": "", "email": "", "password": "", "confirm": ""}
     if request.method == "POST":
         form["name"] = request.form.get("name") or ""
         form["email"] = request.form.get("email") or ""
-        error = register_account(form["name"], form["email"], request.form.get("password"))
-        if error is None:
-            session["login_notice"] = "Account created. Login with your email and password."
-            return redirect(url_for("login"))
-    return render_template("signup.html", error=error, form=form)
+        form["password"] = request.form.get("password") or ""
+        form["confirm"] = request.form.get("confirm_password") or ""
+        if form["password"] != form["confirm"]:
+            warning = "New password and confirm password do not match."
+        else:
+            error = register_account(form["name"], form["email"], form["password"])
+            if error is None:
+                session["login_notice"] = "Account created. Login with your email and password."
+                return redirect(url_for("login"))
+    return render_template("signup.html", error=error, warning=warning, form=form)
 
 
 @app.route("/logout")
 def logout():
-    session.pop("user", None)
-    return redirect(url_for("login"))
+    session.pop("last_analysis_id", None)
+    end_session(session.pop("memory_id", None))
+    session.pop("job_resume_skills", None)
+    session.pop("job_resume_name", None)
+    session.pop("job_cover_letter", None)
+    session.pop("job_cover_skill_key", None)
+    session.pop("job_resume_after_analysis", None)
+    session.pop("job_resume_candidate", None)
+    session.clear()
+    return redirect(url_for("welcome_page"), code=303)
 
 
 @app.route("/jobs")
@@ -723,7 +1118,7 @@ def job_discovery():
     if user["role"] != "candidate":
         return redirect(url_for("review_role", role=user["role"], action="approve", denied=1))
 
-    analysis = RESULTS_CACHE.get(session.get("last_analysis_id"))
+    analysis = _current_analysis()
     recommendations = (analysis or {}).get("recommendations") or []
     suggested = recommendations[0] if recommendations else {}
     location = (request.args.get("location") or "").strip() or "All location"
@@ -767,11 +1162,13 @@ def job_discovery():
                 current.meta["source_count"] = len(results)
                 current.meta["job_count"] = sum(len(item.get("jobs") or []) for item in results)
     else:
-        selected = ["naukri", "linkedin"]
+        selected = [key for key, _label in PROVIDER_OPTIONS]
 
     resume_skills, resume_name = _candidate_resume_skills()
     if searched and not error:
         attach_skill_matches(results, resume_skills)
+        if session.get("memory_id"):
+            remember_jobs(session["memory_id"], results)
 
     return render_template(
         "jobs.html",
@@ -785,13 +1182,18 @@ def job_discovery():
         experience_years=list(range(1, 26)),
         selected=selected,
         posted_labels=POSTED_LABELS,
+        provider_options=PROVIDER_OPTIONS,
         searched=searched and not error,
         error=error,
         results=results,
         resume_name=resume_name,
         resume_skill_count=len(resume_skills),
+        applied=_resume_application_counts(user),
         resume_notice=session.pop("job_resume_notice", None),
         resume_error=session.pop("job_resume_error", None),
+        cover_letter=_cover_letter_for_page(user.get("name")),
+        cover_notice=session.pop("job_cover_notice", None),
+        cover_error=session.pop("job_cover_error", None),
     )
 
 
@@ -832,8 +1234,12 @@ def job_resume_upload():
             return redirect(next_url)
         session["job_resume_skills"] = skill_names
         session["job_resume_name"] = filename
+        session["job_resume_candidate"] = (
+            extract_candidate_name(raw_text) or extract_candidate_name(cleaned) or ""
+        ).strip()
+        session["job_resume_after_analysis"] = session.get("last_analysis_id") or ""
         session["job_resume_notice"] = (
-            f"Uploaded {filename}. Job search will use {len(skill_names)} skills from this resume."
+            f"Uploaded {filename}. Job search and the cover letter will use {len(skill_names)} skills from this resume."
         )
     except Exception:
         session["job_resume_error"] = "That resume could not be read. Try a PDF or Word file."
@@ -843,6 +1249,47 @@ def job_resume_upload():
             os.remove(filepath)
         except OSError:
             pass
+    return redirect(next_url)
+
+
+@app.route("/jobs/applied", methods=["POST"])
+def job_applied():
+    """Count one Apply click against the resume selected for this candidate."""
+    user = _current_user()
+    if user is None:
+        return jsonify(error="Sign in required."), 401
+    if user["role"] != "candidate":
+        return jsonify(error="Only a candidate can record an application."), 403
+    candidate, resume = _active_resume(user)
+    if not candidate:
+        counts = application_counts("", "")
+        counts["tracked"] = False
+        return jsonify(counts)
+    counts = record_application(user.get("email") or "", candidate, resume)
+    counts["tracked"] = True
+    return jsonify(counts)
+
+
+@app.route("/jobs/cover-letter", methods=["POST"])
+def job_cover_letter():
+    """Store the cover letter used when a candidate applies from search results."""
+    user = _current_user()
+    if user is None:
+        return redirect(url_for("login", next=request.full_path))
+    if user["role"] != "candidate":
+        return redirect(url_for("review_role", role=user["role"], action="approve", denied=1))
+
+    next_url = _safe_jobs_next(request.form.get("next")) or url_for("job_discovery")
+    text = (request.form.get("cover_letter") or "").replace("\r\n", "\n").replace("\r", "\n")
+    if len(text) > _COVER_LETTER_LIMIT:
+        text = text[:_COVER_LETTER_LIMIT]
+    if not text.strip():
+        session["job_cover_error"] = "Write a cover letter before saving."
+        return redirect(next_url)
+    skills, _resume_name = _candidate_resume_skills()
+    session["job_cover_letter"] = text
+    session["job_cover_skill_key"] = _skill_key(skills)
+    session["job_cover_notice"] = "Cover letter saved. Check Include cover letter on a job to use it when you apply."
     return redirect(next_url)
 
 
@@ -862,7 +1309,7 @@ def job_export():
     experience = parse_experience(request.args.get("experience"))
     work_mode = parse_work_mode(request.args.get("work_mode"))
     remote_only = request.args.get("remote") == "1"
-    selected = request.args.getlist("provider") or ["naukri", "linkedin"]
+    selected = request.args.getlist("provider") or [key for key, _label in PROVIDER_OPTIONS]
     if not location:
         return redirect(url_for("job_discovery"))
     results = Orchestrator().job_search(
@@ -908,6 +1355,8 @@ def observability_page():
     user = _current_user()
     if user is None:
         return redirect(url_for("login", next=request.path))
+    if user["role"] == "candidate":
+        return redirect(url_for("hub_page"))
     report = run_evaluations()
     return render_template(
         "observability.html",
@@ -917,6 +1366,27 @@ def observability_page():
         summary=trace_summary(),
         middleware_steps=pipeline_steps(),
     )
+
+
+@app.route("/review/delete", methods=["POST"])
+def review_delete():
+    """Remove one stored resume from the Review candidate list."""
+    user = _current_user()
+    if user is None:
+        return redirect(url_for("login", next=request.path))
+    email = user.get("email") or ""
+    name = (request.form.get("candidate") or "").strip()
+    scan_id = scan_id_for(email, name) if name else ""
+    delete_candidate_scan(email, name)
+    if scan_id:
+        RESULTS_CACHE.pop(scan_id, None)
+        if session.get("last_analysis_id") == scan_id:
+            session.pop("last_analysis_id", None)
+    _bind_stored_scan(email)
+    action = request.form.get("review_action") or "approve"
+    if action not in ACTIONS:
+        action = "approve"
+    return redirect(url_for("review_role", role=user["role"], action=action))
 
 
 @app.route("/review/ats-pdf")
@@ -951,7 +1421,11 @@ def review_home():
 def review_scenarios_page():
     """Positive and negative cases for status, score, and share."""
     user = _current_user()
-    selected_role = request.args.get("role") or (user["role"] if user else "all")
+    if user is None:
+        return redirect(url_for("login", next=request.path))
+    if user["role"] == "candidate":
+        return redirect(url_for("hub_page"))
+    selected_role = request.args.get("role") or user["role"]
     selected_kind = request.args.get("kind") or "all"
     if selected_role not in ROLES and selected_role != "all":
         selected_role = "all"
@@ -1050,7 +1524,13 @@ def review_role(role):
                 ["Mail", mail_line],
             ])
             session["review_receipt"] = receipt
-            return redirect(url_for("review_role", role=role, action=action, recorded=1))
+            return redirect(url_for(
+                "review_role",
+                role=role,
+                action=action,
+                recorded=1,
+                candidate=(request.form.get("candidate") or "").strip(),
+            ))
     elif request.args.get("recorded"):
         receipt = session.pop("review_receipt", None)
         case, state = _review_case()
@@ -1076,8 +1556,88 @@ def review_role(role):
         notice_options=notice_options(role),
         old_values=old_values,
         ats_pdf_ready=ats_pdf_ready(case, state),
+        candidates=list_candidates(user.get("email") or ""),
+        selected_candidate="" if case.get("source") == "sample" else case.get("candidate_name") or "",
     )
 
+
+def _candidate_only():
+    """Voice practice is limited to a signed-in candidate."""
+    user = _current_user()
+    if user is None:
+        return None, redirect(url_for("login", next="/voice"))
+    if user["role"] != "candidate":
+        return None, redirect(url_for("review_role", role=user["role"], action="approve", denied=1))
+    return user, None
+
+
+def _voice_turn():
+    payload = request.get_json(silent=True) or {}
+    topic = (payload.get("topic") or "").strip()
+    if topic not in TOPICS:
+        return None, None, (jsonify({"error": "Select a topic from the sidebar."}), 400)
+    question = (payload.get("question") or "").strip()
+    answer = (payload.get("answer") or "").strip()
+    if question not in questions_for(topic):
+        return None, None, (jsonify({"error": "That question is not in candidate_answers.xlsx."}), 400)
+    if not answer:
+        return None, None, (jsonify({"error": "Speak or type an answer first."}), 400)
+    if len(answer) > 4000:
+        answer = answer[:4000]
+    return topic, {"question": question, "answer": answer}, None
+
+
+@app.route("/voice")
+def voice_assistant():
+    """Practice screening interview with microphone transcript and Groq coaching."""
+    _user, denied = _candidate_only()
+    if denied:
+        return denied
+    return render_template("voice.html", topics=TOPICS, questions=load_catalog())
+
+
+@app.route("/api/voice/reply", methods=["POST"])
+def voice_reply():
+    _user, denied = _candidate_only()
+    if denied:
+        return jsonify({"error": "Sign in as a candidate to practice."}), 401
+    topic, turn, error = _voice_turn()
+    if error:
+        return error
+    try:
+        reply = reply_to_answer(topic, turn["question"], turn["answer"])
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 502
+    return jsonify({"reply": reply})
+
+
+@app.route("/api/voice/feedback", methods=["POST"])
+def voice_feedback():
+    _user, denied = _candidate_only()
+    if denied:
+        return jsonify({"error": "Sign in as a candidate to practice."}), 401
+    payload = request.get_json(silent=True) or {}
+    topic = (payload.get("topic") or "").strip()
+    if topic not in TOPICS:
+        return jsonify({"error": "Select a topic from the sidebar."}), 400
+    known = set(questions_for(topic))
+    turns = []
+    for item in payload.get("turns") or []:
+        if not isinstance(item, dict):
+            continue
+        question = (item.get("question") or "").strip()
+        answer = (item.get("answer") or "").strip()
+        if question in known and answer:
+            turns.append({"question": question, "answer": answer[:4000]})
+    if not turns:
+        return jsonify({"error": "Answer at least one question before asking for feedback."}), 400
+    try:
+        return jsonify(feedback_for(topic, turns[:12]))
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 502
+
+
+warm_matcher()
 
 if __name__ == '__main__':
     print("\n" + "="*60)

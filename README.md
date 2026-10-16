@@ -69,13 +69,21 @@ SMTP_FROM=
 ADMIN_EMAIL=
 ```
 
-Start the app:
+Start the Flask app:
 
 ```powershell
 python unified_app.py
 ```
 
 Open [http://localhost:5000](http://localhost:5000).
+
+The same career and research tools are also available in Streamlit:
+
+```powershell
+streamlit run streamlit_app.py
+```
+
+Open [http://localhost:8501](http://localhost:8501). Streamlit uses the resume, job, and research modules directly. The Flask site stays the hosted app.
 
 Research paper generation and document chat need a valid `GEMINI_API_KEY`. Resume analysis, the dashboard, and practice questions work without it. For semantic job matching, also install:
 
@@ -110,6 +118,8 @@ Gemini calls try available `generateContent` models and prefer names that contai
 
 ```text
 unified_app.py          Flask entry point
+streamlit_app.py        Streamlit entry point
+app_pages/              Streamlit pages for home, resume, jobs, practice, and research
 templates/              Hub, resume, dashboard, practice, and research pages
 static/                 CSS and research page script
 parser/                 PDF, DOCX, and section extraction

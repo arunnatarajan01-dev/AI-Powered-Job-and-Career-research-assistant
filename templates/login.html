@@ -3,59 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | AI Resume Analyzer</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
+    <title>Sign In - AI Powered Job and Career research assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth_login.css') }}?v=signin2">
 </head>
-<body>
-    <div class="bg-animated"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-
-    <div class="review-page login-page">
-        <div class="dashboard-container login-wrap">
-            <div class="dashboard-header">
-                <h1>Login <span class="text-gradient">to the career assistant</span></h1>
-                <p class="summary-text">A candidate opens multi-platform job discovery. A mentor opens their review screen.</p>
+<body class="signin-body">
+    <header class="navbar-header">
+        <nav class="nav-container">
+            <div class="logo">
+                <i class="fa-solid fa-brain logo-icon" aria-hidden="true"></i>
+                <span class="logo-text">AI Career Assistant</span>
             </div>
+            <button class="nav-toggle" id="navToggle" type="button" aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('welcome_page') }}" class="nav-item">Welcome</a></li>
+                <li><a href="{{ url_for('login') }}" class="nav-item active" aria-current="page">Login</a></li>
+                <li><a href="{{ url_for('signup') }}" class="btn btn-primary btn-nav-cta">Get Started</a></li>
+            </ul>
+        </nav>
+    </header>
 
-            {% if notice %}
-            <div class="banner ok">{{ notice }}</div>
-            {% endif %}
-            {% if error %}
-            <div class="banner err">{{ error }}</div>
-            {% endif %}
+    <main class="main-content">
+        {% if notice or error %}
+        <div class="flash-messages-container">
+            {% if notice %}<div class="alert alert-success">{{ notice }}</div>{% endif %}
+            {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+        </div>
+        {% endif %}
 
-            <form class="login-form" method="post" action="{{ url_for('login') }}">
-                <input type="hidden" name="next" value="{{ next_url }}">
-                <div class="field">
-                    <label for="email">Email</label>
-                    <input id="email" name="email" type="email" autocomplete="username" required placeholder="name@email.com">
+        <section class="auth-section">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <h2>Welcome Back</h2>
+                        <p>Log in to access your interview dashboard</p>
+                    </div>
+
+                    <form method="post" action="{{ url_for('login') }}" class="auth-form">
+                        <input type="hidden" name="next" value="{{ next_url }}">
+                        <div class="form-group">
+                            <label for="email" class="form-label">
+                                <i class="fa-solid fa-envelope" aria-hidden="true"></i> Email Address
+                            </label>
+                            <input class="form-control" id="email" name="email" placeholder="name@example.com" required type="email" autocomplete="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="form-label">
+                                <i class="fa-solid fa-lock" aria-hidden="true"></i> Password
+                            </label>
+                            <div class="password-wrapper">
+                                <input class="form-control" id="password" name="password" placeholder="Enter your password" required type="password" autocomplete="current-password">
+                                <button type="button" class="btn-toggle-password" id="togglePassword" aria-label="Toggle password visibility">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <p class="field-extra"><a href="{{ url_for('forgot_password') }}">Forgot password</a></p>
+                        <div class="form-submit">
+                            <button type="submit" class="btn btn-primary btn-block btn-submit">
+                                <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Sign In
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="auth-footer">
+                        <p>Don't have an account? <a href="{{ url_for('signup') }}" class="auth-link">Create Account</a></p>
+                    </div>
                 </div>
-                <div class="field">
-                    <label for="password">Password</label>
-                    <input id="password" name="password" type="password" autocomplete="current-password" required>
-                </div>
-                <button type="submit">Login</button>
-            </form>
-            <p class="auth-switch">Need an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
 
-            <h2 style="font-size: 1.15rem; margin-bottom: 0.75rem;">Demo accounts</h2>
-            <div class="role-grid">
-                {% for user in users %}
-                <form class="demo-card" method="post" action="{{ url_for('login') }}">
-                    <input type="hidden" name="next" value="{{ next_url }}">
-                    <input type="hidden" name="email" value="{{ user.email }}">
-                    <input type="hidden" name="password" value="{{ user.password }}">
-                    <h2>{{ user.label }}</h2>
-                    <p>{{ user.name }}</p>
-                    <p>{{ user.email }}</p>
-                    <p>Password {{ user.password }}</p>
-                    <button type="submit">Login as {{ user.name }}</button>
-                </form>
-                {% endfor %}
+                {% if users %}
+                <div class="auth-card demo-block">
+                    <h3>Demo accounts</h3>
+                    <div class="demo-list">
+                        {% for user in users %}
+                        <form class="demo-row" method="post" action="{{ url_for('login') }}">
+                            <input type="hidden" name="next" value="{{ next_url }}">
+                            <input type="hidden" name="email" value="{{ user.email }}">
+                            <input type="hidden" name="password" value="{{ user.password }}">
+                            <p><strong>{{ user.label }}</strong>{{ user.email }}</p>
+                            <button type="submit">Sign in</button>
+                        </form>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="logo">
+                    <i class="fa-solid fa-brain logo-icon" aria-hidden="true"></i>
+                    <span>AI Career Assistant</span>
+                </div>
+                <p>AI-powered job search, resume feedback, and interview practice.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="{{ url_for('welcome_page') }}">Welcome</a></li>
+                    <li><a href="{{ url_for('login') }}">Login</a></li>
+                    <li><a href="{{ url_for('signup') }}">Register</a></li>
+                </ul>
+            </div>
+            <div class="footer-copyright">
+                <p>&copy; 2026 AI Powered Job and Career research assistant. All rights reserved.</p>
             </div>
         </div>
-    </div>
+    </footer>
+
+    <script>
+        document.getElementById("navToggle").addEventListener("click", function () {
+            document.getElementById("navLinks").classList.toggle("open");
+        });
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            var field = document.getElementById("password");
+            var icon = this.querySelector("i");
+            var hidden = field.type === "password";
+            field.type = hidden ? "text" : "password";
+            icon.className = hidden ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
+        });
+    </script>
 </body>
 </html>

@@ -1,4 +1,6 @@
 flask==3.0.0
+streamlit==1.64.0
+pinecone==10.0.0
 python-dotenv==1.0.0
 google-generativeai==0.8.5
 protobuf==5.29.6
@@ -9,3 +11,4 @@ werkzeug==3.0.1
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
+groq

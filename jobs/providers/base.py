@@ -210,14 +210,20 @@ def format_job_description(value):
 
 def experience_bounds(item, description=""):
     """Return the inclusive years a posting asks for, or None when it does not say."""
-    if isinstance(item, dict) and item.get("experience_min") not in (None, ""):
-        try:
-            low = int(item.get("experience_min"))
-            high = int(item.get("experience_max") or low)
-        except (TypeError, ValueError):
-            low = high = None
-        if low is not None:
-            return min(low, high), max(low, high)
+    if isinstance(item, dict):
+        raw_low = item.get("experience_min")
+        raw_high = item.get("experience_max")
+        if raw_low in (None, ""):
+            raw_low = item.get("experienceMin")
+            raw_high = item.get("experienceMax")
+        if raw_low not in (None, ""):
+            try:
+                low = int(raw_low)
+                high = int(raw_high or low)
+            except (TypeError, ValueError):
+                low = high = None
+            if low is not None:
+                return min(low, high), max(low, high)
     text = description or ""
     ranged = re.search(
         r"(\d+)\s*(?:-|–|to)\s*(\d+)\s*\+?\s*(?:years|yrs)",
@@ -296,6 +302,7 @@ _JOB_BOARDS = (
     "naukri.com",
     "indeed.com",
     "foundit.in",
+    "mployee.me",
     "shine.com",
     "glassdoor.",
 )
@@ -312,6 +319,16 @@ COMPANY_CAREER_PAGES = {
     "bluepeak": "https://www.linkedin.com/jobs/search/?keywords=Bluepeak",
     "indus cloud": "https://www.linkedin.com/jobs/search/?keywords=Indus%20Cloud",
     "sable labs": "https://www.linkedin.com/jobs/search/?keywords=Sable%20Labs",
+    "rivermark": "https://in.indeed.com/jobs?q=Rivermark&l=Bengaluru",
+    "coral bay": "https://in.indeed.com/jobs?q=Coral%20Bay&l=Mumbai",
+    "nimbus grid": "https://in.indeed.com/jobs?q=Nimbus%20Grid&l=Hyderabad",
+    "paperlane": "https://in.indeed.com/jobs?q=Paperlane&l=Pune",
+    "aster peak": "https://www.foundit.in/search/aster-peak-jobs",
+    "saffron labs": "https://www.foundit.in/search/saffron-labs-jobs",
+    "monsoon systems": "https://www.foundit.in/search/monsoon-systems-jobs",
+    "brightpath": "https://www.mployee.me/job-match-pro",
+    "koel systems": "https://www.mployee.me/job-match-pro",
+    "fieldnote": "https://www.mployee.me/job-match-pro",
     "google": "https://www.google.com/about/careers/applications/",
     "meta": "https://www.metacareers.com/jobs",
     "microsoft": "https://careers.microsoft.com/",
@@ -421,6 +438,17 @@ def _description_text(item):
     return format_job_description(raw)
 
 
+def _employment_type(item):
+    employment = (
+        item.get("employment_type")
+        or item.get("employmentType")
+        or item.get("contractType")
+    )
+    if not employment and isinstance(item.get("employmentTypes"), list):
+        employment = ", ".join(str(part) for part in item["employmentTypes"] if part)
+    return str(employment or "Full-time").strip()
+
+
 def _normalize(raw, provider_key):
     jobs = []
     for item in raw or []:
@@ -440,12 +468,7 @@ def _normalize(raw, provider_key):
             "company": str(company).strip(),
             "location": location,
             "posted_days_ago": _posted_days_ago(item),
-            "employment_type": str(
-                item.get("employment_type")
-                or item.get("employmentType")
-                or item.get("contractType")
-                or "Full-time"
-            ).strip(),
+            "employment_type": _employment_type(item),
             "description": posting_text(description, location, years_label),
             "experience_min": bounds[0] if bounds else None,
             "experience_max": bounds[1] if bounds else None,
@@ -485,6 +508,15 @@ def _filter_jobs(jobs, location, posted_within):
         job for job in jobs
         if location_matches(job["location"], location) and within_window(job["posted_days_ago"], posted_within)
     ]
+
+
+def apify_job_limit():
+    """Cap live provider results. APIFY_JOB_LIMIT stays between 1 and 50."""
+    limit = os.getenv("APIFY_JOB_LIMIT", "15").strip() or "15"
+    try:
+        return max(1, min(int(limit), 50))
+    except ValueError:
+        return 15
 
 
 class CatalogProvider:

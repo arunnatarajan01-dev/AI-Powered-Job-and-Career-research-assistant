@@ -340,7 +340,14 @@ body {
     flex: 1;
     margin-left: 1.5rem;
     justify-content: flex-start;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.35rem;
+}
+
+.navbar.app-nav .nav-links a {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
 }
 
 .navbar.app-nav .nav-signout {
@@ -1057,6 +1064,71 @@ body {
     padding: var(--space-xl);
     backdrop-filter: blur(10px);
     animation: fadeInUp 0.6s ease both;
+}
+
+.memory-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.memory-table th,
+.memory-table td {
+    text-align: left;
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: top;
+}
+
+.memory-chat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.memory-bubble {
+    padding: 0.75rem 0.9rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+}
+
+.memory-bubble p {
+    margin: 0.35rem 0 0;
+}
+
+.memory-form {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.memory-form input {
+    flex: 1;
+    padding: 0.7rem 0.8rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: transparent;
+    color: inherit;
+}
+
+.memory-form button {
+    padding: 0.7rem 1rem;
+    border: 0;
+    border-radius: 10px;
+    background: #00d4aa;
+    color: #072018;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
 }
 
 .dash-card h3 {

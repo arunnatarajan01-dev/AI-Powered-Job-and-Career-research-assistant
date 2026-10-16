@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Powered Job and Career research assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root,
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --line: #334155;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --primary: #6366f1;
+            --secondary: #818cf8;
+        }
+
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --line: #e2e8f0;
+            --text: #0f172a;
+            --muted: #475569;
+            --primary: #4f46e5;
+            --secondary: #6366f1;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Inter, sans-serif;
+            line-height: 1.5;
+        }
+
+        a { color: inherit; }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.1rem 1.25rem;
+        }
+
+        .brand {
+            font-family: Outfit, sans-serif;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .top-actions,
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 0.55rem 1.05rem;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+        }
+
+        .btn-secondary {
+            color: var(--text);
+            background: transparent;
+            border-color: var(--line);
+        }
+
+        .hero,
+        .block {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem 1.5rem 2.5rem;
+        }
+
+        .hero { padding-top: 2.5rem; }
+
+        .kicker {
+            color: var(--secondary);
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin: 0 0 0.45rem;
+        }
+
+        h1, h2, h3 { font-family: Outfit, sans-serif; line-height: 1.15; }
+
+        h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); max-width: 14ch; margin: 0 0 0.8rem; }
+        h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin: 0 0 1.25rem; }
+        h3 { font-size: 1.12rem; margin: 0 0 0.4rem; }
+
+        .lede {
+            max-width: 62ch;
+            color: var(--muted);
+            font-size: 1.05rem;
+            margin: 0 0 1.4rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem;
+        }
+
+        .card,
+        .step {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 1.1rem;
+            padding: 1.15rem 1.15rem 1.2rem;
+        }
+
+        .card p,
+        .step p { margin: 0; color: var(--muted); }
+
+        .why { display: grid; gap: 0.75rem; }
+
+        .why article {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.9rem;
+            align-items: start;
+        }
+
+        .num {
+            font-family: Outfit, sans-serif;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.15rem;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.9rem;
+        }
+
+        .theme-toggle {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: var(--card);
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        footer {
+            padding: 0.5rem 1.5rem 1.5rem;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 800px) {
+            .grid, .steps { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="{{ url_for('welcome_page') }}">Career assistant</a>
+        <div class="top-actions">
+            <a class="btn btn-secondary" href="{{ url_for('login') }}">Log in</a>
+            <a class="btn btn-primary" href="{{ url_for('signup') }}">Create account</a>
+            <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch to light mode">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <section class="hero">
+        <p class="kicker">AI-assisted job search</p>
+        <h1>Find your next role with clarity</h1>
+        <p class="lede">Surfaces roles that fit your profile, explains the match, adds company context, and helps you ship tailored applications — less noise, more momentum.</p>
+        <div class="hero-actions">
+            <a class="btn btn-primary" href="{{ url_for('signup') }}">Create account</a>
+            <a class="btn btn-secondary" href="{{ url_for('login') }}">Log in</a>
+        </div>
+    </section>
+
+    <section class="block" aria-labelledby="what-you-get">
+        <p class="kicker" id="what-you-get">What you get</p>
+        <h2>Built around your search</h2>
+        <div class="grid">
+            <article class="card">
+                <h3>Fresh roles on your radar</h3>
+                <p>Jobs surface from your search preferences so you are not endlessly refreshing the same boards.</p>
+            </article>
+            <article class="card">
+                <h3>Clear fit, not guesswork</h3>
+                <p>Each posting gets a structured evaluation against your profile so you can prioritise with confidence.</p>
+            </article>
+            <article class="card">
+                <h3>Company context in one place</h3>
+                <p>Brief research on the employer helps you tailor tone and talk credibly in interviews and letters.</p>
+            </article>
+            <article class="card">
+                <h3>Documents that match the brief</h3>
+                <p>Draft a tailored CV and cover letter aligned to the posting, then refine before you apply.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="block" aria-labelledby="why">
+        <p class="kicker" id="why">Why</p>
+        <h2>A focused toolkit for serious applicants</h2>
+        <div class="why">
+            <article class="card">
+                <div class="num">01</div>
+                <div>
+                    <h3>Scoped to you</h3>
+                    <p>Your data and evaluations stay tied to your account — structured signals, not a black box.</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="num">02</div>
+                <div>
+                    <h3>Pipeline in the background</h3>
+                    <p>Fetching and analysis run asynchronously so the UI stays responsive while work completes.</p>
+                </div>
+            </article>
+            <article class="card">
+                <div class="num">03</div>
+                <div>
+                    <h3>Honest fit framing</h3>
+                    <p>Clear summaries help you spend energy on roles that actually align with your goals.</p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="block" aria-labelledby="flow">
+        <p class="kicker" id="flow">Simple flow</p>
+        <h2>Three steps to momentum</h2>
+        <div class="steps">
+            <article class="step">
+                <p class="num">1</p>
+                <h3>Create your profile</h3>
+                <p>Add your experience, skills, and job preferences so evaluations are grounded in you.</p>
+            </article>
+            <article class="step">
+                <p class="num">2</p>
+                <h3>Discover &amp; review</h3>
+                <p>See surfaced roles with fit summaries and company context before you invest time.</p>
+            </article>
+            <article class="step">
+                <p class="num">3</p>
+                <h3>Apply with polish</h3>
+                <p>Generate tailored documents when you are ready, then send with confidence.</p>
+            </article>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 AI Powered Job and Career research assistant. All rights reserved.</p>
+    </footer>
+    <script>
+        (function () {
+            var key = "welcome-theme";
+            var root = document.documentElement;
+            var button = document.getElementById("themeToggle");
+            var sun = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>';
+            var moon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"></path></svg>';
+            var saved = localStorage.getItem(key);
+            root.setAttribute("data-theme", saved === "light" ? "light" : "dark");
+
+            function paint() {
+                var dark = root.getAttribute("data-theme") !== "light";
+                button.innerHTML = dark ? sun : moon;
+                button.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+            }
+
+            paint();
+            button.addEventListener("click", function () {
+                var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+                root.setAttribute("data-theme", next);
+                localStorage.setItem(key, next);
+                paint();
+            });
+        })();
+    </script>
+</body>
+</html>

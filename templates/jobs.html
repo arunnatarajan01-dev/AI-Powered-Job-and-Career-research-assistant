@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job discovery | AI Resume Analyzer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/resume_style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}?v=jobs7">
 </head>
 <body class="jobs-body">
     <div class="bg-animated"></div>
@@ -17,12 +17,59 @@
 
     <div class="review-page">
         <div class="dashboard-container">
-            <div class="dashboard-header">
-                <h1>AI Resume Analyzer and <span class="text-gradient">Job Discovery</span></h1>
-                <p class="summary-text summary-clamp">Signed in as {{ user.name }}. Search LinkedIn and Naukri by location for today, last week, or last month.</p>
+            <div class="dashboard-header jobs-header">
+                <div class="jobs-header-copy">
+                    <h1>AI Resume Analyzer and <span class="text-gradient">Job Discovery</span></h1>
+                    <p class="summary-text summary-clamp">Signed in as {{ user.name }}. Search Naukri, LinkedIn, Indeed, Job Match Pro, and Foundit by location for today, last week, or last month.</p>
+                </div>
+                <section class="apply-counts" id="applyCounts" aria-label="Applications for this resume" data-record-url="{{ url_for('job_applied') }}" data-ready="{{ '1' if applied.tracked else '0' }}">
+                    <p><span>Applied Today :</span> <strong id="appliedToday">{{ applied.today }}</strong></p>
+                    <p><span>Applied Yesterday :</span> <strong id="appliedYesterday">{{ applied.yesterday }}</strong></p>
+                    <p><span>Applied Last week :</span> <strong id="appliedLastWeek">{{ applied.last_week }}</strong></p>
+                </section>
             </div>
 
-            <form id="jobSearch" class="review-panel" method="get" action="{{ url_for('job_discovery') }}">
+            <div class="review-panel">
+                <section class="resume-upload-section" aria-label="Resume scoring">
+                    <p class="resume-upload-note" id="resumeStatus">
+                        {% if resume_name %}
+                        Scoring uses skills from {{ resume_name }}{% if resume_skill_count %} ({{ resume_skill_count }} skills){% endif %}.
+                        {% else %}
+                        Upload a resume to score each job against your skills.
+                        {% endif %}
+                    </p>
+                    <label class="job-action" for="resumeFile">
+                        <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 16V5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                            <path d="M8 8.5L12 4.5L16 8.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                        </svg>
+                        Upload Resume
+                    </label>
+                </section>
+                <form id="coverLetterForm" class="cover-letter-section" method="post" action="{{ url_for('job_cover_letter') }}">
+                    <input type="hidden" name="next" value="{{ request.full_path }}">
+                    <h2 class="cover-letter-heading">Cover letter</h2>
+                    {% if resume_name %}
+                    <p class="resume-upload-note">Skill set is taken from {{ resume_name }}.</p>
+                    {% else %}
+                    <p class="resume-upload-note">Upload or scan a resume and this letter will use that skill set.</p>
+                    {% endif %}
+                    <div class="cover-letter-wrap">
+                        <textarea id="coverLetter" name="cover_letter" class="cover-letter-text is-clamped" rows="14" aria-label="Cover letter">{{ cover_letter }}</textarea>
+                        <button type="button" class="job-more" id="coverLetterMore" aria-expanded="false" aria-controls="coverLetter">more</button>
+                    </div>
+                    <div class="cover-letter-actions">
+                        <button type="submit" class="job-action">Save</button>
+                    </div>
+                    {% if cover_error %}
+                    <div class="banner err">{{ cover_error }}</div>
+                    {% endif %}
+                    {% if cover_notice %}
+                    <div class="banner ok">{{ cover_notice }}</div>
+                    {% endif %}
+                </form>
+            <form id="jobSearch" method="get" action="{{ url_for('job_discovery') }}">
                 <div class="field">
                     <label for="keyword">Role</label>
                     <input id="keyword" name="keyword" type="text" value="{{ keyword or 'software engineer' }}" placeholder="software engineer">
@@ -63,14 +110,12 @@
                     {% endfor %}
                 </div>
                 <div class="review-kicker">Providers</div>
+                {% for key, label in provider_options %}
                 <label class="check-row">
-                    <input type="checkbox" name="provider" value="naukri" {% if 'naukri' in selected %}checked{% endif %}>
-                    <span>Naukri</span>
+                    <input type="checkbox" name="provider" value="{{ key }}" {% if key in selected %}checked{% endif %}>
+                    <span>{{ label }}</span>
                 </label>
-                <label class="check-row">
-                    <input type="checkbox" name="provider" value="linkedin" {% if 'linkedin' in selected %}checked{% endif %}>
-                    <span>LinkedIn</span>
-                </label>
+                {% endfor %}
                 {% if error %}
                 <div class="banner err">{{ error }}</div>
                 {% endif %}
@@ -88,25 +133,9 @@
                         </svg>
                         Search jobs
                     </button>
-                    <label class="job-action" for="resumeFile">
-                        <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M12 16V5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                            <path d="M8 8.5L12 4.5L16 8.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                            <path d="M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                        </svg>
-                        Upload new Resume
-                    </label>
                 </div>
-                {% if not searched %}
-                <p class="missing-note" id="resumeStatus">
-                    {% if resume_name %}
-                    Scoring uses skills from {{ resume_name }}{% if resume_skill_count %} ({{ resume_skill_count }} skills){% endif %}.
-                    {% else %}
-                    Upload a resume to score each job against your skills.
-                    {% endif %}
-                </p>
-                {% endif %}
             </form>
+            </div>
             <form id="resumeUpload" method="post" enctype="multipart/form-data" action="{{ url_for('job_resume_upload') }}">
                 <input type="hidden" name="next" value="{{ request.full_path }}">
                 <input id="resumeFile" name="resume" type="file" accept=".pdf,.docx,.doc" class="visually-hidden">
@@ -128,6 +157,7 @@
                             <tr class="job-result">
                                 <th>
                                     {{ job.title }}
+                                    <span class="provider-tag">{{ result.label }}</span>
                                     {% if job.skill_match_percent is not none %}
                                     <div class="skill-match">{{ job.skill_match_percent }}% matched</div>
                                     {% endif %}
@@ -144,10 +174,14 @@
                                     {% endif %}
                                     <div class="job-apply">
                                         {% if job.career_url %}
-                                        <a class="apply-direct" href="{{ job.career_url }}" target="_blank" rel="noopener noreferrer">Apply directly</a>
+                                        <a class="apply-direct" href="{{ job.career_url }}" target="_blank" rel="noopener noreferrer" data-company="{{ job.company }}" data-title="{{ job.title }}">Apply directly</a>
                                         {% else %}
-                                        <button type="button" class="apply-direct is-unavailable" data-company="{{ job.company }}">Apply directly</button>
+                                        <button type="button" class="apply-direct is-unavailable" data-company="{{ job.company }}" data-title="{{ job.title }}">Apply directly</button>
                                         {% endif %}
+                                        <label class="include-cover">
+                                            <input type="checkbox" class="include-cover-input">
+                                            <span>Include cover letter</span>
+                                        </label>
                                     </div>
                                 </td>
                             </tr>
@@ -168,6 +202,6 @@
         <p class="loading-text">Loading…</p>
         <div class="job-loading-list" id="jobSearchLoadingList"></div>
     </div>
-    <script src="{{ url_for('static', filename='js/jobs.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jobs.js') }}?v=jobs7"></script>
 </body>
 </html>

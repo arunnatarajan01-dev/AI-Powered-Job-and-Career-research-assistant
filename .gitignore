@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 .env
+.streamlit/secrets.toml
 venv/
 ENV/
 
@@ -27,6 +28,10 @@ instance/
 uploads/
 logs/
 data/registered_users.json
+data/password_resets.json
+data/session_memory.db
+data/job_embeddings.npz
+data/long_term/
 
 # Local configuration files
 .vscode/

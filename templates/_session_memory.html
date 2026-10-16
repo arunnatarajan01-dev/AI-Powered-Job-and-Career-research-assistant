@@ -1,0 +1,113 @@
+<section class="full-section" id="session-memory">
+    <h3><span class="card-icon">🗄️</span> Session memory</h3>
+    <p class="summary-text">Jobs, this candidate, evidence, rankings, and chat stay in SQLite until you sign out.</p>
+    {% if memory_error %}
+    <p class="summary-text">{{ memory_error }}</p>
+    {% endif %}
+
+    <div class="dashboard-grid">
+        <div class="dash-card">
+            <h3>Candidate</h3>
+            <table class="memory-table">
+                <tbody>
+                {% for person in memory.candidates %}
+                <tr><th>Name</th><td>{{ person.name or "—" }}</td></tr>
+                <tr><th>Email</th><td>{{ person.email or "—" }}</td></tr>
+                <tr><th>Phone</th><td>{{ person.phone or "—" }}</td></tr>
+                <tr><th>File</th><td>{{ person.filename or "—" }}</td></tr>
+                <tr><th>Experience</th><td>{{ person.experience_years }} years</td></tr>
+                <tr><th>Skills</th><td>{{ person.skills or "—" }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="dash-card">
+            <h3>Rankings</h3>
+            {% if memory.rankings %}
+            <table class="memory-table">
+                <thead>
+                    <tr><th>Rank</th><th>Role</th><th>Score</th><th>Fit</th><th>Source</th></tr>
+                </thead>
+                <tbody>
+                {% for rank in memory.rankings %}
+                <tr>
+                    <td>{{ rank.rank }}</td>
+                    <td>{{ rank.title }}{% if rank.company %} · {{ rank.company }}{% endif %}</td>
+                    <td>{{ rank.score }}%</td>
+                    <td>{{ rank.fit }}</td>
+                    <td>{{ rank.source }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No rankings stored yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="dash-card">
+        <h3>Jobs</h3>
+        {% if memory.jobs %}
+        <table class="memory-table">
+            <thead>
+                <tr><th>Source</th><th>Role</th><th>Company</th><th>Location</th><th>Score</th></tr>
+            </thead>
+            <tbody>
+            {% for job in memory.jobs %}
+            <tr>
+                <td>{{ job.source }}</td>
+                <td>{% if job.url %}<a href="{{ job.url }}">{{ job.title }}</a>{% else %}{{ job.title }}{% endif %}</td>
+                <td>{{ job.company }}</td>
+                <td>{{ job.location }}</td>
+                <td>{% if job.match_score is not none %}{{ job.match_score }}%{% else %}—{% endif %}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No jobs stored yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="dash-card">
+        <h3>Evidence</h3>
+        {% if memory.evidence %}
+        <table class="memory-table">
+            <thead>
+                <tr><th>Kind</th><th>Related role</th><th>Text</th></tr>
+            </thead>
+            <tbody>
+            {% for item in memory.evidence %}
+            <tr>
+                <td>{{ item.kind }}</td>
+                <td>{{ item.job_title or "—" }}</td>
+                <td>{{ item.text }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No evidence stored yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="dash-card">
+        <h3>Chat history</h3>
+        <div class="memory-chat">
+            {% for message in memory.messages %}
+            <div class="memory-bubble memory-{{ message.role }}">
+                <strong>{{ "You" if message.role == "user" else "Assistant" }}</strong>
+                <p>{{ message.content }}</p>
+            </div>
+            {% else %}
+            <p>Ask about the stored candidate, jobs, rankings, or evidence.</p>
+            {% endfor %}
+            <form class="memory-form" method="post" action="{{ url_for('dashboard_chat') }}">
+                <label class="sr-only" for="memory-message">Message</label>
+                <input id="memory-message" name="message" type="text" maxlength="4000" placeholder="Ask about this scan" required>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+</section>

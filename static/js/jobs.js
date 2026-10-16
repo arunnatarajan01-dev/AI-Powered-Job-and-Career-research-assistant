@@ -4,7 +4,11 @@
     const list = document.getElementById("jobSearchLoadingList");
     if (!form || !overlay || !list) return;
 
-    const labels = { naukri: "Naukri", linkedin: "LinkedIn" };
+    const labels = {};
+    form.querySelectorAll('input[name="provider"]').forEach(function (box) {
+        const text = box.parentElement.querySelector("span");
+        labels[box.value] = text ? text.textContent.trim() : box.value;
+    });
 
     form.addEventListener("submit", function () {
         const selected = Array.from(form.querySelectorAll('input[name="provider"]:checked')).map(function (box) {
@@ -157,16 +161,126 @@
 })();
 
 (function () {
-    document.querySelectorAll(".apply-direct.is-unavailable").forEach(function (button) {
-        button.addEventListener("click", function () {
-            const company = button.getAttribute("data-company") || "this company";
-            let note = button.parentElement.querySelector(".apply-note");
-            if (!note) {
-                note = document.createElement("p");
-                note.className = "apply-note";
-                button.insertAdjacentElement("afterend", note);
+    const letter = document.getElementById("coverLetter");
+    const more = document.getElementById("coverLetterMore");
+    if (!letter || !more) return;
+    more.addEventListener("click", function () {
+        const open = letter.classList.toggle("is-open");
+        letter.classList.toggle("is-clamped", !open);
+        more.textContent = open ? "less" : "more";
+        more.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+})();
+
+(function () {
+    const results = document.getElementById("jobResults");
+    if (!results) return;
+
+    function noteFor(apply, message) {
+        const row = apply.closest(".job-apply") || apply.parentElement;
+        let note = row.querySelector(".apply-note");
+        if (!note) {
+            note = document.createElement("p");
+            note.className = "apply-note";
+            row.appendChild(note);
+        }
+        note.textContent = message;
+    }
+
+    function letterForJob(company, title) {
+        const source = document.getElementById("coverLetter");
+        let text = source ? source.value : "";
+        if (company) {
+            text = text.replace(/^To[ \t]*:[ \t]*$/m, function () {
+                return "To : " + company;
+            });
+        }
+        if (title) {
+            text = text.replace(/^Subject:[ \t]*Application for suitable position[ \t]*$/m, function () {
+                return "Subject:  Application for " + title;
+            });
+            text = text.replace(/applying for a suitable position/g, function () {
+                return "applying for the " + title + " role";
+            });
+        }
+        return text;
+    }
+
+    function copyText(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(text).catch(function () {
+                return fallbackCopy(text);
+            });
+        }
+        return fallbackCopy(text);
+    }
+
+    function fallbackCopy(text) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        area.setAttribute("readonly", "");
+        area.style.position = "fixed";
+        area.style.left = "-9999px";
+        document.body.appendChild(area);
+        area.select();
+        try {
+            document.execCommand("copy");
+        } catch (error) {
+            /* The note still tells the candidate the letter is ready to paste. */
+        }
+        area.remove();
+        return Promise.resolve();
+    }
+
+    let applyStamp = 0;
+
+    function recordApplication() {
+        const section = document.getElementById("applyCounts");
+        const today = document.getElementById("appliedToday");
+        const yesterday = document.getElementById("appliedYesterday");
+        const lastWeek = document.getElementById("appliedLastWeek");
+        if (!section || section.getAttribute("data-ready") !== "1" || !today) return;
+        const stamp = ++applyStamp;
+        const shown = Number(today.textContent) || 0;
+        today.textContent = String(shown + 1);
+        fetch(section.getAttribute("data-record-url"), {
+            method: "POST",
+            headers: {Accept: "application/json"},
+        }).then(function (response) {
+            return response.json();
+        }).then(function (counts) {
+            if (stamp !== applyStamp || !counts || counts.today == null) return;
+            today.textContent = String(counts.today);
+            if (yesterday) yesterday.textContent = String(counts.yesterday);
+            if (lastWeek) lastWeek.textContent = String(counts.last_week);
+        }).catch(function () {
+            /* The click already raised today's count on the page. */
+        });
+    }
+
+    results.addEventListener("click", function (event) {
+        const apply = event.target.closest("a.apply-direct, button.apply-direct");
+        if (!apply || !results.contains(apply)) return;
+        recordApplication();
+        const row = apply.closest(".job-apply");
+        const include = row && row.querySelector(".include-cover-input:checked");
+        const unavailable = apply.classList.contains("is-unavailable");
+        const company = apply.getAttribute("data-company") || "this company";
+        if (!include) {
+            if (!unavailable) return;
+            noteFor(apply, "No career page is listed for " + company + ".");
+            return;
+        }
+        event.preventDefault();
+        const text = letterForJob(apply.getAttribute("data-company") || "", apply.getAttribute("data-title") || "");
+        const href = apply.getAttribute("href");
+        copyText(text).then(function () {
+            if (unavailable) {
+                noteFor(apply, "No career page is listed for " + company + ". Cover letter copied so you can paste it when you apply.");
+                return;
             }
-            note.textContent = "No career page is listed for " + company + ".";
+            noteFor(apply, "Cover letter copied. Paste it into the application.");
+            if (href) window.open(href, "_blank", "noopener");
         });
     });
 })();

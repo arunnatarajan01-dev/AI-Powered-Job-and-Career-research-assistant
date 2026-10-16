@@ -15,7 +15,7 @@ TOOL_SCHEMAS = (
     },
     {
         "name": "search_jobs",
-        "description": "Search LinkedIn and Naukri by location, posting window, and role.",
+        "description": "Search Naukri, LinkedIn, Indeed, Job Match Pro, and Foundit by location, posting window, and role.",
         "parameters": {
             "type": "object",
             "properties": {

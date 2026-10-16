@@ -19,7 +19,7 @@
     <div class="particles" id="particles"></div>
 
     <!-- Navigation -->
-    {% set nav_active = 'home' %}
+    {% set nav_active = active_nav|default('main') %}
     {% include '_nav.html' %}
 
     <!-- Hero Section -->

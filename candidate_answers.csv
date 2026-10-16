@@ -1,0 +1,8 @@
+Question,Candidate Answer Summary,Score
+"1. What is Python, and why is it popular?","Python is a high?level, interpreted programming language known for its simplicity and readability. It’s popular because it has a huge ecosystem of libraries, is easy to learn, and is widely used in AI, data science, and web development.",7
+2. What are Python’s key features,"Python is dynamically typed, supports object?oriented programming, has a large standard library, and is cross?platform. Its syntax is simple, which makes it beginner?friendly",8
+3.What are Python data types,"Common data types include integers, floats, strings, lists, tuples, sets, and dictionaries. Each type is used to store different kinds of values.",9
+4. What is the difference between a list and a tuple in Python?,"A list is mutable, meaning you can change its elements after creation. A tuple is immutable, so once defined, its elements cannot be modified.",8
+"5. What are Python functions, and why are they useful?","Functions are blocks of reusable code that perform a specific task. They help reduce repetition, make code modular, and improve readability.",8
+6. What is the difference between == and is in Python?,"“== checks if two values are equal, while is checks if two variables point to the same object in memory.”",7
+"7. What is PEP 8, and why is it important?","PEP 8 is Python’s style guide. It defines best practices for writing clean, readable, and consistent code, which is important when working in teams.",6

@@ -1,12 +1,26 @@
 """Run the selected provider adapters for one location and date window."""
 
 from jobs.providers.base import POSTED_WINDOWS, apply_search_filters
+from jobs.providers.foundit import FounditProvider
+from jobs.providers.indeed import IndeedProvider
+from jobs.providers.job_match_pro import JobMatchProProvider
 from jobs.providers.linkedin import LinkedInProvider
 from jobs.providers.naukri import NaukriProvider
 
+PROVIDER_OPTIONS = (
+    ("naukri", "Naukri"),
+    ("linkedin", "LinkedIn"),
+    ("indeed", "Indeed"),
+    ("job_match_pro", "Job Match Pro"),
+    ("foundit", "Foundit"),
+)
+
 PROVIDERS = {
-    "linkedin": LinkedInProvider(),
     "naukri": NaukriProvider(),
+    "linkedin": LinkedInProvider(),
+    "indeed": IndeedProvider(),
+    "job_match_pro": JobMatchProProvider(),
+    "foundit": FounditProvider(),
 }
 
 POSTED_LABELS = (
@@ -55,8 +69,8 @@ def parse_experience(value):
 
 
 def _provider_rank(provider):
-    """Naukri is listed before LinkedIn on the jobs page."""
-    order = ("naukri", "linkedin")
+    """Keep provider results in the same order as the jobs page."""
+    order = [key for key, _label in PROVIDER_OPTIONS]
     try:
         return order.index(provider.key)
     except ValueError:

@@ -1,5 +1,7 @@
 # AI Powered Job and Career research assistant
 
+Application: [http://localhost:5000/welcome](http://localhost:5000/welcome)
+
 A Flask application that combines career guidance and research assistance in one site. The hub is branded **IntegrateAI**. From there you can analyze a resume or work with research papers.
 
 The running application is `unified_app.py` at the project root. It serves the pages in `templates/` and the logic in `parser/`, `models/`, `recommendation/`, `preparation/`, and `safety/`.
@@ -137,6 +139,4 @@ uploads/                Temporary resume files, removed after analysis
 
 ## Application
 
-Open the application: [https://ai-career-research-assistant-resume.onrender.com](https://ai-career-research-assistant-resume.onrender.com)
-
-On the free tier, the first request after idle time can take about a minute.
+[http://localhost:5000/welcome](http://localhost:5000/welcome)

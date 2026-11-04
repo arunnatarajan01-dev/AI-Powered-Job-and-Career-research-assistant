@@ -77,7 +77,7 @@ Start the Flask app:
 python unified_app.py
 ```
 
-Open [http://localhost:5000](http://localhost:5000).
+Open [http://localhost:5000/welcome](http://localhost:5000/welcome).
 
 The same career and research tools are also available in Streamlit:
 

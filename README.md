@@ -135,17 +135,8 @@ uploads/                Temporary resume files, removed after analysis
 
 ---
 
-## Docker image
+## Application
 
-The published image is on Docker Hub: [arunn103/ai-powered-job-and-career-research-assistant](https://hub.docker.com/r/arunn103/ai-powered-job-and-career-research-assistant)
+Open the application: [https://ai-career-research-assistant-resume.onrender.com](https://ai-career-research-assistant-resume.onrender.com)
 
-```powershell
-docker pull arunn103/ai-powered-job-and-career-research-assistant:latest
-docker run -p 5000:5000 --env-file .env arunn103/ai-powered-job-and-career-research-assistant:latest
-```
-
-Open [http://localhost:5000](http://localhost:5000). Keep `GEMINI_API_KEY` in `.env` on the machine that runs the container. The key is not stored in the image.
-
-## Hosted copy
-
-A deployed instance is published at [https://ai-career-research-assistant-resume.onrender.com](https://ai-career-research-assistant-resume.onrender.com). On the free tier, the first request after idle time can take about a minute.
+On the free tier, the first request after idle time can take about a minute.
